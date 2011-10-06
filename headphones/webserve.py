@@ -16,7 +16,6 @@ from headphones.helpers import checked, radio
 
 
 def serve_template(templatename, **kwargs):
-
   interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
   template_dir = os.path.join(str(interface_dir), headphones.INTERFACE)
   
@@ -29,7 +28,6 @@ def serve_template(templatename, **kwargs):
     return exceptions.html_error_template().render()
   
 class WebInterface(object):
-  
   def index(self):
     raise cherrypy.HTTPRedirect("home")
   index.exposed=True
@@ -46,8 +44,7 @@ class WebInterface(object):
     albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
     return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
   artistPage.exposed = True
-  
-  
+
   def albumPage(self, AlbumID):
     myDB = db.DBConnection()
     album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
@@ -56,8 +53,7 @@ class WebInterface(object):
     title = album['ArtistName'] + ' - ' + album['AlbumTitle']
     return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
   albumPage.exposed = True
-  
-  
+
   def search(self, name, type):
     if len(name) == 0:
       raise cherrypy.HTTPRedirect("home")
@@ -74,7 +70,7 @@ class WebInterface(object):
     threading.Thread(target=lastfm.getSimilar).start()
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
   addArtist.exposed = True
-  
+
   def getExtras(self, ArtistID):
     myDB = db.DBConnection()
     controlValueDict = {'ArtistID': ArtistID}
@@ -84,7 +80,7 @@ class WebInterface(object):
     time.sleep(10)
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
   getExtras.exposed = True
-  
+
   def removeExtras(self, ArtistID):
     myDB = db.DBConnection()
     controlValueDict = {'ArtistID': ArtistID}
@@ -226,7 +222,7 @@ class WebInterface(object):
         time.sleep(30)
     raise cherrypy.HTTPRedirect("home")
   markArtists.exposed = True
-  
+
   def importLastFM(self, username):
     headphones.LASTFM_USERNAME = username
     headphones.config_write()
@@ -234,7 +230,7 @@ class WebInterface(object):
     time.sleep(10)
     raise cherrypy.HTTPRedirect("home")
   importLastFM.exposed = True
-  
+
   def importItunes(self, path):
     headphones.PATH_TO_XML = path
     headphones.config_write()
@@ -242,12 +238,12 @@ class WebInterface(object):
     time.sleep(10)
     raise cherrypy.HTTPRedirect("home")
   importItunes.exposed = True
-  
+
   def musicScan(self, path, redirect=None, autoadd=0):
     headphones.ADD_ARTISTS = autoadd
     headphones.MUSIC_DIR = path
     headphones.config_write()
-    try:  
+    try:
       threading.Thread(target=librarysync.libraryScan).start()
     except Exception, e:
       logger.error('Unable to complete the scan: %s' % e)
@@ -257,41 +253,41 @@ class WebInterface(object):
     else:
       raise cherrypy.HTTPRedirect("home")
   musicScan.exposed = True
-  
+
   def forceUpdate(self):
     from headphones import updater
     threading.Thread(target=updater.dbUpdate).start()
     time.sleep(5)
     raise cherrypy.HTTPRedirect("home")
   forceUpdate.exposed = True
-  
+
   def forceSearch(self):
     from headphones import searcher
     threading.Thread(target=searcher.searchNZB).start()
     time.sleep(5)
     raise cherrypy.HTTPRedirect("home")
   forceSearch.exposed = True
-  
+
   def forcePostProcess(self):
     from headphones import postprocessor
     threading.Thread(target=postprocessor.forcePostProcess).start()
     time.sleep(5)
     raise cherrypy.HTTPRedirect("home")
   forcePostProcess.exposed = True
-  
+
   def checkGithub(self):
     from headphones import versioncheck
     versioncheck.checkGithub()
     raise cherrypy.HTTPRedirect("home")
   checkGithub.exposed = True
-  
+
   def history(self):
     myDB = db.DBConnection()
     history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
     return serve_template(templatename="history.html", title="History", history=history)
     return page
   history.exposed = True
-  
+
   def logs(self):
     return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
   logs.exposed = True
@@ -370,8 +366,7 @@ class WebInterface(object):
         }
     return serve_template(templatename="config.html", title="Settings", config=config)  
   config.exposed = True
-  
-  
+
   def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
     sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
     usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
@@ -386,7 +381,7 @@ class WebInterface(object):
     headphones.LAUNCH_BROWSER = launch_browser
     headphones.SAB_HOST = sab_host
     headphones.SAB_USERNAME = sab_username
-    headphones.SAB_PASSWORD = sab_password    
+    headphones.SAB_PASSWORD = sab_password
     headphones.SAB_APIKEY = sab_apikey
     headphones.SAB_CATEGORY = sab_category
     headphones.DOWNLOAD_DIR = download_dir
@@ -431,11 +426,11 @@ class WebInterface(object):
     headphones.ENCODERVBRCBR = encodervbrcbr
     headphones.ENCODERQUALITY = int(encoderquality)
     headphones.ENCODERLOSSLESS = encoderlossless
-    
+
     headphones.config_write()
 
     raise cherrypy.HTTPRedirect("config")
-    
+
   configUpdate.exposed = True
 
   def shutdown(self):
@@ -448,17 +443,17 @@ class WebInterface(object):
 
   def restart(self):
     headphones.SIGNAL = 'restart'
-    message = 'Restarting...'
+    message = 'Restarting in 30 Seconds&hellip;'
     return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
   restart.exposed = True
-  
+
   def update(self):
     headphones.SIGNAL = 'update'
-    message = 'Updating...'
+    message = 'Updating&hellip;'
     return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
     return page
   update.exposed = True
-    
+
   def extras(self):
     myDB = db.DBConnection()
     cloudlist = myDB.select('SELECT * from lastfmcloud')
