@@ -1,0 +1,102 @@
+<%
+  import headphones
+  from headphones import version
+%>
+<!doctype html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Headphones::Hipster - ${title}</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/headphoneslogo.png">
+    <link rel="stylesheet" href="interfaces/hipster/boilerplate.css">
+    <link rel="stylesheet" href="interfaces/hipster/style.css">
+
+    ${next.headIncludes()}
+
+    <script src="js/libs/modernizr-1.7.min.js"></script>
+  </head>
+
+  <body>
+    <div id="container">
+      <header>
+        <div id="logo">
+          <a href="home"><img src="images/headphoneslogo.png" alt="headphones"></a>
+        </div>
+
+        <ul id="nav">
+          <li><a href="manage">Artists</a></li>
+          <li><a href="upcoming">upcoming</a></li>
+          <li><a href="history">history</a></li>
+          <li><a href="logs">logs</a></li>
+          <li><a href="config">settings</a></li>
+        </ul>
+
+        <div id="searchbar">
+          <form action="search" method="get">
+            <input type="text" value="" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
+            <select name="type">
+              <option value="artist">Artist</option>
+              <option value="album">Album</option>
+            </select> 
+            <input type="submit" value="Add"/>
+          </form>
+        </div>
+
+        <div id="subhead">
+          ${next.headerIncludes()}
+        </div>
+      </header>
+
+      <div id="main" class="main">
+        ${next.body()}
+      </div>
+
+      <footer>
+        % if not headphones.CURRENT_VERSION:
+          <div id="updatebar">
+            You're running an unknown version of Headphones. <a href="update">Click here to update</a>
+          </div>
+        % elif headphones.CURRENT_VERSION != headphones.LATEST_VERSION and headphones.INSTALL_TYPE != 'win':
+          <div id="updatebar">
+            A <a href="http://github.com/rembo10/headphones/compare/${headphones.CURRENT_VERSION}...${headphones.LATEST_VERSION}"> newer version</a> is available. You're ${headphones.COMMITS_BEHIND} commits behind. <a href="update">Click here to update</a>
+          </div>
+        % endif
+
+        <div id="version">
+          Version: ${headphones.CURRENT_VERSION}
+          %if version.HEADPHONES_VERSION != 'master':
+          (${version.HEADPHONES_VERSION})
+          %endif
+        </div>
+      </footer>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.2.min.js"%3E%3C/script%3E'))</script>
+    ${next.javascriptIncludes()}
+
+    <script src="js/plugins.js"></script>
+    <script src="js/script.js"></script>
+
+    <!--[if lt IE 7 ]>
+    <script src="js/libs/dd_belatedpng.js"></script>
+    <script> DD_belatedPNG.fix('img, .png_bg');</script>
+    <![endif]-->
+  </body>
+</html>
+
+<%def name="javascriptIncludes()"></%def>
+<%def name="headIncludes()"></%def>
+<%def name="headerIncludes()"></%def>
