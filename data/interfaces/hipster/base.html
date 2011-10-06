@@ -39,8 +39,8 @@
           <li><a href="manage">Artists</a></li>
           <li><a href="upcoming">upcoming</a></li>
           <li><a href="history">history</a></li>
-          <li><a href="logs">logs</a></li>
-          <li><a href="config">settings</a></li>
+          <li class="extra"><a href="logs"><img title="Logs" src="images/logs.png" /></a></li>
+          <li class="extra"><a href="config"><img title="Configure Application" src="images/configure.png" /></a></li>
         </ul>
 
         <div id="searchbar">
@@ -54,9 +54,7 @@
           </form>
         </div>
 
-        <div id="subhead">
-          ${next.headerIncludes()}
-        </div>
+        ${next.headerIncludes()}
       </header>
 
       <div id="main" class="main">

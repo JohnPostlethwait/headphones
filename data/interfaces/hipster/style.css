@@ -14,6 +14,18 @@ a:active { /*colour in NN4.xx is red*/
   color: #5E2612;
   text-decoration: underline;
 }
+input[type=text], input[type=password] {
+  padding: 3px 5px;
+  font-size: 1.2em;
+  border:1px solid #666;
+  background-color: #fafafa;
+  margin: 2px 5px;
+}
+input[type=text]:focus, input[type=password]:focus, textarea:focus, select:focus {
+  -webkit-box-shadow:0 0 15px #000;
+  -moz-box-shadow:0 0 15px #000;
+  box-shadow:0 0 15px #000;
+}
 
 
 body {
@@ -52,6 +64,11 @@ header {
     startColorstr=#800000FF, endColorstr=#800000FF
   );
 }
+header input[type=text]:focus {
+  -webkit-box-shadow:0 0 15px #fff;
+  -moz-box-shadow:0 0 15px #fff;
+  box-shadow:0 0 15px #fff;
+}
 
 
 h1 { font-size: 24px; }
@@ -70,9 +87,9 @@ p.center { text-align: center; font-size: 18px; }
 }
 div#logo { float: left; padding-left: 10px; }
 
-ul#nav { margin: 25px 0 0 0; float: left; list-style-type: none; }
-ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
-ul#nav li a {
+header ul#nav { margin: 20px 0 0 0; float: left; list-style-type: none; }
+header ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
+header ul#nav li a {
   padding: 5px;
   font-size: 16px;
   font-weight: bold;
@@ -80,7 +97,10 @@ ul#nav li a {
   text-decoration: none;
   text-transform: uppercase;
 }
-ul#nav li a:hover {
+header ul#nav li a img {
+  vertical-align: middle;
+}
+header ul#nav li a:hover {
   color: #fff;
 }
 
@@ -99,7 +119,7 @@ ul#subhead_menu li a {
   padding: 5px 15px 10px 15px;
   vertical-align: middle;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   text-decoration: none;
 }
 ul#subhead_menu li a:hover {

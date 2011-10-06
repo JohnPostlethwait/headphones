@@ -17,14 +17,18 @@
 </%def>
 <%def name="body()">
   <div class="table_wrapper">
-    <h1>Scan Music Library</h1><br />
-    Where do you keep your music?<br /><br />
-    You can put in any directory, and it will scan for audio files in that folder
-    (including all subdirectories)<br /><br />    For example: '/Users/name/Music'
-    <br /> <br />
-    It may take a while depending on how many files you have. You can navigate away from the page<br />
-    as soon as you click 'Submit'
-    <br /><br />
+    <h1>Scan Music Library</h1>
+
+    <p>
+      Where do you keep your music? You can put in any directory, and it will 
+      scan for audio files in that folder (including all subdirectories.)
+      <br />
+      <small>For example: '/Users/name/Music'</small>
+      <br />
+      It may take a while depending on how many files you have. You can 
+      navigate away from the page as soon as you click 'Submit'.
+    </p>
+
     <form action="musicScan" method="GET" align="center">
     %if headphones.MUSIC_DIR:
       <input type="text" value="${headphones.MUSIC_DIR}" name="path" size="70" />
