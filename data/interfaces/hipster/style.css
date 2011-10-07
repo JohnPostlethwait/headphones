@@ -136,8 +136,8 @@ div#main { margin: 0; padding: 100px 0 0 0; }
   border-radius: 20px;
   -webkit-border-radius: 20px;
   -moz-border-radius: 20px;
-  width: 88%;
-  margin: 20px auto 0 auto;
+  width: 800px;
+  margin: 20px auto 10px auto;
   padding: 25px;
   background-color: white;
   position: relative;
@@ -147,9 +147,8 @@ div#main { margin: 0; padding: 100px 0 0 0; }
   -moz-box-shadow: 2px 5px 5px #000;
   -webkit-box-shadow: 2px 5px 5px #000;
 }
-.manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
-.table_wrapper_left { padding: 25px; background-color: #ffffff; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
-.table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
+.table_wrapper_left { padding: 25px; background-color: #fff; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
+.table_wrapper_right{ padding: 25px; background-color: #fff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
 
 .configtable { font-size: 14px; line-height:18px; }
 .configtable td { width: 350px; padding: 10px; }

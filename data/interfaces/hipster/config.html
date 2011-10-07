@@ -10,6 +10,10 @@
       %if not headphones.ADD_ARTISTS:
       <li><a href="manageNew">Manage New Artists</a></li>
       %endif
+      <li><a href="forceUpdate">Update Active Artists</a></li>
+      <li><a href="forceSearch">Check for Wanted Albums</a></li>
+      <li><a href="checkGithub">Check for Updates</a></li>
+      <li><a href="forcePostProcess">Post-Process Downloads</a></li>
       <li><a href="shutdown">Shut Down</a></li>
       <li><a href="restart">Restart</a></li>
     </ul>
@@ -42,7 +46,7 @@
     <input type="submit" /></form>
   </div>
 
-  <div class="table_wrapper_left">
+  <div class="table_wrapper">
     <h1><img src="images/last.fm.png"> Import Last.FM Artists</h1><br />
     Enter the username whose artists you want to import:<br /><br />
     <form action="importLastFM" method="GET" align="center">
@@ -55,15 +59,6 @@
       <input type="text" value="${lastfmvalue}" onfocus="if
       (this.value==this.defaultValue) this.value='';" name="username" size="18" />
       <input type="submit" /></form><br /><br />
-  </div>
-
-  <div class="table_wrapper_right">
-    <h1><img src="images/force-search.png"> Force Search</h1>
-
-    <h3><a href="forceSearch">Force Check for Wanted Albums</a></h3>
-    <h3><a href="forceUpdate">Force Update Active Artists</a></h3>
-    <h3><a href="forcePostProcess">Force Post-Process Albums in Download Folder</a></h3>
-    <h3><a href="checkGithub">Check for Headphones Updates</a></h3>
   </div>
 
   <div class="table_wrapper">
@@ -417,7 +412,7 @@
 
         <p class="center"><input type="submit" value="Save Changes"><br>
         (Web Interface changes require a restart to take effect)</h3>
-      </form>
+      </form>
 </%def>
 
 <%def name="javascriptIncludes()">
