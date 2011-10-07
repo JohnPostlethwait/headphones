@@ -82,7 +82,7 @@ def getVersion():
       return current_version
     else:
       return None
-  
+
 def checkGithub():
   commits_behind = 0
   cur_commit = headphones.CURRENT_VERSION
@@ -98,94 +98,83 @@ def checkGithub():
 
     if curCommit.id == cur_commit:
       break
-      
+
     commits_behind += 1
-    
+
   headphones.LATEST_VERSION = latest_commit
   headphones.COMMITS_BEHIND = commits_behind
-    
+
   if headphones.LATEST_VERSION == headphones.CURRENT_VERSION:
     logger.info('Headphones is already up-to-date.')
-    
+
   return latest_commit
-    
 
-  
 def update():
-
-  
   if headphones.INSTALL_TYPE == 'win':
-  
     logger.info('Windows .exe updating not supported yet.')
     pass
-  
-
   elif headphones.INSTALL_TYPE == 'git':
-    
     output, err = runGit('pull origin ' + version.HEADPHONES_VERSION)
-    
+
     if not output:
       logger.error('Couldn\'t download latest version')
-      
+
     for line in output.split('\n'):
-    
       if 'Already up-to-date.' in line:
         logger.info('No update available, not updating')
         logger.info('Output: ' + str(output))
       elif line.endswith('Aborting.'):
         logger.error('Unable to update from git: '+line)
         logger.info('Output: ' + str(output))
-        
   else:
-  
     tar_download_url = 'http://github.com/rembo10/headphones/tarball/'+version.HEADPHONES_VERSION
     update_dir = os.path.join(headphones.PROG_DIR, 'update')
     version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
-    
+
     try:
       logger.info('Downloading update from: '+tar_download_url)
       data = urllib2.urlopen(tar_download_url)
     except (IOError, URLError):
       logger.error("Unable to retrieve new version from "+tar_download_url+", can't update")
       return
-      
+
     download_name = data.geturl().split('/')[-1]
-    
+
     tar_download_path = os.path.join(headphones.PROG_DIR, download_name)
-    
+
     # Save tar to disk
     f = open(tar_download_path, 'wb')
     f.write(data.read())
     f.close()
-    
+
     # Extract the tar to update folder
     logger.info('Extracing file' + tar_download_path)
     tar = tarfile.open(tar_download_path)
     tar.extractall(update_dir)
     tar.close()
-    
+
     # Delete the tar.gz
     logger.info('Deleting file' + tar_download_path)
     os.remove(tar_download_path)
-    
+
     # Find update dir name
     update_dir_contents = [x for x in os.listdir(update_dir) if os.path.isdir(os.path.join(update_dir, x))]
     if len(update_dir_contents) != 1:
       logger.error(u"Invalid update data, update failed: "+str(update_dir_contents))
       return
     content_dir = os.path.join(update_dir, update_dir_contents[0])
-    
+
     # walk temp folder and move files to main folder
     for dirname, dirnames, filenames in os.walk(content_dir):
       dirname = dirname[len(content_dir)+1:]
       for curfile in filenames:
         old_path = os.path.join(content_dir, dirname, curfile)
         new_path = os.path.join(headphones.PROG_DIR, dirname, curfile)
-        
+
         if os.path.isfile(new_path):
           os.remove(new_path)
         os.renames(old_path, new_path)
-        
+
     # Update version.txt
     try:
       ver_file = open(version_path, 'w')

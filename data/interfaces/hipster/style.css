@@ -70,11 +70,15 @@ header input[type=text]:focus {
   box-shadow:0 0 15px #fff;
 }
 
-
 h1 { font-size: 24px; }
 h2 { font-size: 20px; }
 h3 { font-size: 16px; }
-
+p {
+  margin: 10px 0;
+}
+label {
+  font-weight: bold;
+}
 
 p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
 p.center { text-align: center; font-size: 18px; }
@@ -85,7 +89,10 @@ p.center { text-align: center; font-size: 18px; }
   width: 100%;
   float: right;
 }
-div#logo { float: left; padding-left: 10px; }
+div#logo {
+  float: left;
+  padding-left: 10px;
+}
 
 header ul#nav { margin: 20px 0 0 0; float: left; list-style-type: none; }
 header ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
@@ -128,9 +135,15 @@ ul#subhead_menu li a:hover {
   color: #aaa;
 }
 
-div#searchbar { margin: 20px 30px auto auto; float: right; }
+div#searchbar {
+  margin: 20px 30px auto auto;
+  float: right;
+}
 
-div#main { margin: 0; padding: 100px 0 0 0; }
+div#main {
+  margin: 0;
+  padding-top: 100px;
+}
 
 .table_wrapper {
   border-radius: 20px;
@@ -141,14 +154,11 @@ div#main { margin: 0; padding: 100px 0 0 0; }
   padding: 25px;
   background-color: white;
   position: relative;
-  min-height: 200px;
   clear: both;
   zoom: 1;
   -moz-box-shadow: 2px 5px 5px #000;
   -webkit-box-shadow: 2px 5px 5px #000;
 }
-.table_wrapper_left { padding: 25px; background-color: #fff; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
-.table_wrapper_right{ padding: 25px; background-color: #fff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
 
 .configtable { font-size: 14px; line-height:18px; }
 .configtable td { width: 350px; padding: 10px; }
