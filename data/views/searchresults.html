@@ -26,9 +26,9 @@
           %>
           <tr class="grade${grade}">
           %if type == 'album':
-            <td id="albumname"><a href="${result['albumurl']}" target="_blank">${result['title']}</a></td>
+            <td id="albumname"><a href="${result['albumurl']}" target="_blank">${result['title']}</a> <img src="/images/link.png" alt="External link." style="vertical-align:middle;" /></td>
           %endif
-            <td id="artistname"><a href="${result['url']}" target="_blank">${result['uniquename']}</a></td>
+            <td id="artistname"><a href="${result['url']}" target="_blank">${result['uniquename']}</a> <img src="/images/link.png" alt="External link." style="vertical-align:middle;" /></td>
             <td id="score">${result['score']}</td>
           %if type == 'album':
             <td id="add"><a href="addReleaseById?rid=${result['albumid']}">Add this album</a></td>
