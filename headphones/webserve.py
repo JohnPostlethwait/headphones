@@ -29,14 +29,10 @@ def serve_template(templatename, **kwargs):
   
 class WebInterface(object):
   def index(self):
-    raise cherrypy.HTTPRedirect("home")
-  index.exposed=True
-
-  def home(self):
     myDB = db.DBConnection()
     artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
-    return serve_template(templatename="index.html", title="Home", artists=artists)
-  home.exposed = True
+    return serve_template(templatename="index.html", title="index", artists=artists)
+  index.exposed = True
 
   def artistPage(self, ArtistID):
     myDB = db.DBConnection()
@@ -56,7 +52,7 @@ class WebInterface(object):
 
   def search(self, name, type):
     if len(name) == 0:
-      raise cherrypy.HTTPRedirect("home")
+      raise cherrypy.HTTPRedirect("index")
     if type == 'artist':
       searchresults = mb.findArtist(name, limit=100)
     else:
@@ -117,7 +113,7 @@ class WebInterface(object):
     myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
     myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
     myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   deleteArtist.exposed = True
 
   def refreshArtist(self, ArtistID):
@@ -148,7 +144,7 @@ class WebInterface(object):
   def addArtists(self, **args):
     threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
     time.sleep(5)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   addArtists.exposed = True
 
   def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None):
@@ -181,7 +177,7 @@ class WebInterface(object):
     if ArtistID:
       raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     else:
-      raise cherrypy.HTTPRedirect("home")
+      raise cherrypy.HTTPRedirect("index")
   deleteAlbum.exposed = True
 
   def upcoming(self):
@@ -214,7 +210,7 @@ class WebInterface(object):
         # These may and probably will collide - need to make a better way to queue musicbrainz queries
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()
         time.sleep(30)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   markArtists.exposed = True
 
   def importLastFM(self, username):
@@ -222,7 +218,7 @@ class WebInterface(object):
     headphones.config_write()
     threading.Thread(target=lastfm.getArtists).start()
     time.sleep(10)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   importLastFM.exposed = True
 
   def importItunes(self, path):
@@ -230,7 +226,7 @@ class WebInterface(object):
     headphones.config_write()
     threading.Thread(target=importer.itunesImport, args=[path]).start()
     time.sleep(10)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   importItunes.exposed = True
 
   def musicScan(self, path, redirect=None, autoadd=0):
@@ -245,34 +241,34 @@ class WebInterface(object):
     if redirect:
       raise cherrypy.HTTPRedirect(redirect)
     else:
-      raise cherrypy.HTTPRedirect("home")
+      raise cherrypy.HTTPRedirect("index")
   musicScan.exposed = True
 
   def forceUpdate(self):
     from headphones import updater
     threading.Thread(target=updater.dbUpdate).start()
     time.sleep(5)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   forceUpdate.exposed = True
 
   def forceSearch(self):
     from headphones import searcher
     threading.Thread(target=searcher.searchNZB).start()
     time.sleep(5)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   forceSearch.exposed = True
 
   def forcePostProcess(self):
     from headphones import postprocessor
     threading.Thread(target=postprocessor.forcePostProcess).start()
     time.sleep(5)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   forcePostProcess.exposed = True
 
   def checkGithub(self):
     from headphones import versioncheck
     versioncheck.checkGithub()
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   checkGithub.exposed = True
 
   def history(self):
@@ -458,7 +454,7 @@ class WebInterface(object):
   def addReleaseById(self, rid):
     threading.Thread(target=importer.addReleaseById, args=[rid]).start()
     time.sleep(5)
-    raise cherrypy.HTTPRedirect("home")
+    raise cherrypy.HTTPRedirect("index")
   addReleaseById.exposed = True
   
   def updateCloud(self):
