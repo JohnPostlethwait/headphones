@@ -19,7 +19,7 @@
         <li><a href="getExtras?ArtistID=${artist['ArtistID']}">Get Extras</a></li>
       %endif
     </ul>
-  </div>  
+  </div>
 </%def>
 
 <%def name="body()">
@@ -27,7 +27,7 @@
     <div class="table_wrapper table_sorting">
       <h1 class="left">${artist['ArtistName']}</h1>
       %if artist['Status'] == 'Loading':
-        <p>(Album information for this artist is currently being loaded)</p>
+        <p> (Album information for this artist is currently being loaded)</p>
       %endif
 
       <p class="right">Mark selected albums as 

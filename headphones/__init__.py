@@ -302,18 +302,18 @@ def initialize():
                 os.makedirs(CACHE_DIR)
             except OSError:
                 logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
-        
+
         # Initialize the database
         logger.info('Checking to see if the database has all tables....')
         try:
             dbcheck()
         except Exception, e:
             logger.error("Can't connect to the database: %s" % e)
-            
+
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
         CURRENT_VERSION = versioncheck.getVersion()
-        
+
         # Check for new versions
         try:
             LATEST_VERSION = versioncheck.checkGithub()
@@ -486,7 +486,6 @@ def start():
         started = True
     
 def dbcheck():
-
     conn=sqlite3.connect(DB_FILE)
     c=conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER)')

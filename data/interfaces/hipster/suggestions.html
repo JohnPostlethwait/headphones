@@ -1,0 +1,22 @@
+<%inherit file="base.html" />
+
+<%def name="headerIncludes()">
+  <div id="subhead_container">
+    <ul id="subhead_menu">
+      <li><a href="updateCloud">Refresh Suggestions</a></li>
+    </ul>
+  </div>
+</%def>
+
+<%def name="body()">
+  <div class="table_wrapper">
+    <h1>Artists You Might Like</h1>
+    <div class="cloudtag">
+      <ul id="cloud">
+      %for artist in cloudlist:
+        <li><a href="addArtist?artistid=${artist['ArtistID']}" class="tag${artist['Count']}">${artist['ArtistName']}</a></li>
+      %endfor
+      </ul>
+    </div>
+  </div>
+</%def>

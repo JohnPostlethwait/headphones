@@ -74,10 +74,12 @@ def addArtisttoDB(artistid, extrasonly=False):
 
   logger.info(u"Now adding/updating: " + artist['artist_name'])
   controlValueDict = {"ArtistID":   artistid}
-  newValueDict = {"ArtistName":     artist['artist_name'],
-          "ArtistSortName":   sortname,
-          "DateAdded":    helpers.today(),
-          "Status":       "Loading"}
+  newValueDict = {
+    "ArtistName":     artist['artist_name'],
+    "ArtistSortName": sortname,
+    "DateAdded":      helpers.today(),
+    "Status":         "Loading"
+  }
 
   if headphones.INCLUDE_EXTRAS:
     newValueDict['IncludeExtras'] = 1
@@ -99,10 +101,10 @@ def addArtisttoDB(artistid, extrasonly=False):
       continue
 
     logger.info(u"Now adding/updating album: " + rg['title'])
-    controlValueDict = {"AlbumID":  rg['id']}
+    controlValueDict = { "AlbumID": rg['id'] }
 
     if len(rg_exists):
-      newValueDict = {"AlbumASIN": release_dict['asin'], "ReleaseDate": release_dict['releasedate'] }
+      newValueDict = { "AlbumASIN": release_dict['asin'], "ReleaseDate": release_dict['releasedate'] }
 
     else:
       newValueDict = {"ArtistID":     artistid,
@@ -111,13 +113,14 @@ def addArtisttoDB(artistid, extrasonly=False):
         "AlbumASIN":    release_dict['asin'],
         "ReleaseDate":  release_dict['releasedate'],
         "DateAdded":    helpers.today(),
-        "Type":         rg['type']
+        "Type":         rg['type'],
+        "Status":       "Wanted"
       }
 
-      if release_dict['releasedate'] > helpers.today():
-        newValueDict['Status'] = "Wanted"
-      else:
-        newValueDict['Status'] = "Skipped"
+      # if release_dict['releasedate'] > helpers.today():
+      #   newValueDict['Status'] = "Wanted"
+      # else:
+      #   newValueDict['Status'] = "Skipped"
 
     myDB.upsert("albums", newValueDict, controlValueDict)
 
