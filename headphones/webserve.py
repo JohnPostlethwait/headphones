@@ -191,12 +191,6 @@ class WebInterface(object):
     return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
   upcoming.exposed = True
 
-  def manage(self):
-    myDB = db.DBConnection()
-    artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
-    return serve_template(templatename="manage.html", title="Manage Artists", artists=artists)
-  manage.exposed = True 
-
   def manageNew(self):
     return serve_template(templatename="managenew.html", title="Manage New Artists")
   manageNew.exposed = True
