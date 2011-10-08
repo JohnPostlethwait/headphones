@@ -1,7 +1,7 @@
 <%inherit file="base.html" />
 <%def name="body()">
   <div class="table_wrapper">
-    <h1>Upcoming Albums</h1>
+    <h1 class="left">Upcoming Albums</h1>
     <table class="display" id="upcoming_table">
       <thead>
         <tr>
@@ -30,7 +30,7 @@
 
   <form action="markAlbums" method="get">
     <div class="table_wrapper">
-      <h1>Wanted Albums</h1>
+      <h1 class="left">Wanted Albums</h1>
       <p class="right">Mark selected albums as 
         <select name="action">
             <option value="Skipped">Skipped</option>
@@ -75,6 +75,14 @@
   <script>
     $(document).ready(function() {
       $('#wanted_table').dataTable( {
+        "aoColumns": [
+          { "bSortable": false },
+          { "bSortable": false },
+          { "sType": "title-string" },
+          { "sType": "title-string" },
+          { "sType": "title-string" },
+          { "sType": "title-string" }
+        ],
         "bFilter": false,
         "bInfo": false,
         "bPaginate": false

@@ -1,150 +1,189 @@
-/*  HTML5 ✰ Boilerplate  */
-
-html, body, div, span, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
-small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section, summary,
-time, mark, audio, video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
-
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-  display: block;
-}
-
-blockquote, q { quotes: none; }
-blockquote:before, blockquote:after,
-q:before, q:after { content: ''; content: none; }
-ins { background-color: #ff9; color: #000; text-decoration: none; }
-mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
-del { text-decoration: line-through; }
-abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
-table { border-collapse: collapse; border-spacing: 0; }
-hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
-input, select { vertical-align: middle; }
-
-body { font:13px/1.231 sans-serif; *font-size:small; } 
-select, input, textarea, button { font:99% sans-serif; }
-pre, code, kbd, samp { font-family: monospace, sans-serif; }
-
-html { overflow-y: scroll; }
-a:hover, a:active { outline: none; }
-ul, ol { margin-left: 2em; }
-ol { list-style-type: decimal; }
-nav ul, nav li { margin: 0; list-style:none; list-style-image: none; }
-small { font-size: 85%; }
-strong, th { font-weight: bold; }
-td { vertical-align: top; }
-
-sub, sup { font-size: 75%; line-height: 0; position: relative; }
-sup { top: -0.5em; }
-sub { bottom: -0.25em; }
-
-pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 15px; }
-textarea { overflow: auto; }
-.ie6 legend, .ie7 legend { margin-left: -7px; } 
-input[type="radio"] { vertical-align: text-bottom; }
-input[type="checkbox"] { vertical-align: bottom; }
-.ie7 input[type="checkbox"] { vertical-align: baseline; }
-.ie6 input { vertical-align: text-bottom; }
-label, input[type="button"], input[type="submit"], input[type="image"], button { cursor: pointer; }
-button, input, select, textarea { margin: 0; }
-input:valid, textarea:valid   {  }
-input:invalid, textarea:invalid { border-radius: 1px; -moz-box-shadow: 0px 0px 5px red; -webkit-box-shadow: 0px 0px 5px red; box-shadow: 0px 0px 5px red; }
-.no-boxshadow input:invalid, .no-boxshadow textarea:invalid { background-color: #f0dddd; }
-
-::-moz-selection{ background: grey; color:#fff; text-shadow: none; }
-::selection { background: grey; color:#fff; text-shadow: none; }
-
-button {  width: auto; overflow: visible; }
-.ie7 img { -ms-interpolation-mode: bicubic; }
-
-body, select, input, textarea {  color: #444; }
-h1, h2, h3, h4, h5, h6 { font-weight: bold; }
-
-/*
-    // ========================================== \\
-   ||                                              ||
-   ||               Custom Styles                  ||
-   ||                                              ||
-    \\ ========================================== //
-*/
-
 a:link {
-	color: #5E2612; 
-  	text-decoration: none; 
-  	}
+  color: #a3e532;
+  text-decoration: none;
+}
 a:visited {
-  	color: #5E2612; 
-	text-decoration: none; 
-	}
+  color: #a3e532;
+  text-decoration: none;
+}
 a:hover { /*this effect is not shown in NN4.xx*/
-  	color: #999999; 
-	text-decoration: underline;
-  	}
-a:active {/*colour in NN4.xx is red*/ 
-  	color: #5E2612; 
-  	text-decoration: underline; 
-	}
-a.blue {
-	color: blue;
-	}
+  color: #999;
+  text-decoration: none;
+}
+a:active { /*colour in NN4.xx is red*/
+  color: #5E2612;
+  text-decoration: none;
+}
+input[type=text], input[type=password] {
+  padding: 3px 5px;
+  font-size: 16px;
+  border:1px solid #666;
+  background-color: #fafafa;
+  margin: 2px 0 2px 5px;
+}
+input[type=text]:focus, input[type=password]:focus, textarea:focus, select:focus {
+  -webkit-box-shadow:0 0 15px #000;
+  -moz-box-shadow:0 0 15px #000;
+  box-shadow:0 0 15px #000;
+}
 
-container {  }
 
-body { background-color: #EBF4FB; min-width: 935px; }
+body {
+  background-color: #3a3a3a;
+  min-width: 935px;
+}
 
-header { min-height: 68px; width: 100%; min-width: 935px; padding-left: 0px; padding-right: 10px; background-color: #CDC9C9; position: fixed; z-index: 998; }
+
+header {
+  -moz-box-shadow: 0 1px 3px #444;
+  -webkit-box-shadow: 0 1px 3px #444;
+  text-shadow: 0 2px 1px #222;
+  min-height: 68px;
+  width: 100%;
+  min-width: 935px;
+  padding-left: 0px;
+  padding-right: 10px;
+  position: fixed;
+  z-index: 998;
+  border-bottom: 1px solid #ddd;
+  /* webkit */
+  background-image: -webkit-gradient(
+    linear, left top, left bottom, from(rgba(0,0,0,0.7)),
+    to(rgba(0,0,0,0.7)), color-stop(0.9,#111)
+  );
+  /* mozilla example - FF3.6+ */
+  background-image: -moz-linear-gradient(
+    rgba(0, 0, 0, 0.7) 0%, rgba(30, 30, 30, 0.7) 90%
+  );
+  /* approximately a 33% opacity */
+  filter: progid:DXImageTransform.Microsoft.gradient(
+    startColorstr=#800000FF, endColorstr=#800000FF
+  );
+  /* IE8 uses -ms-filter for whatever reason... */
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(
+    startColorstr=#800000FF, endColorstr=#800000FF
+  );
+}
+header input[type=text]:focus {
+  -webkit-box-shadow:0 0 15px #fff;
+  -moz-box-shadow:0 0 15px #fff;
+  box-shadow:0 0 15px #fff;
+}
 
 h1 { font-size: 24px; }
 h2 { font-size: 20px; }
 h3 { font-size: 16px; }
-h4 { font-size: 14px; }
+p {
+  margin: 10px 0;
+}
+label {
+  font-weight: bold;
+  font-size: 16px;
+}
+fieldset {
+  margin: 20px 0 0 35px;
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+  padding-left: 20px;
+}
+fieldset legend {
+  font-weight: bold;
+  font-size: 20px;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  padding: 0 20px;
+}
+.table_wrapper label {
+  display: inline-block;
+  width: 175px;
+}
+.table_wrapper.table_sorting label {
+  width: inherit;
+}
 
-p.indented { padding-top: 20px; margin-left: 20px; font-size: 14px; }
-p.center { text-align: center; font-size: 18px; }
-.smalltext2 { font-size: 12px; margin-left: 45px; }
+.left { float: left; }
+.right { float: right; }
+.center { text-align: center; }
 
-div#updatebar { text-align: center; min-width: 970px; width: 100%; background-color: light-blue; float: left; }
-div#logo { float: left; padding-left: 10px; }
+#updatebar {
+  text-align: center;
+  min-width: 970px;
+  width: 100%;
+  float: right;
+}
+div#logo {
+  float: left;
+  padding-left: 10px;
+}
 
-ul#nav { margin: 25px 0 0 0; float: left; list-style-type: none; }
-ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
-ul#nav li a { padding: 5px; font-size: 16px; font-weight: bold; color: #330000; text-decoration: none; }
-ul#nav li a:hover { background-color: #a3e532; }
+header ul#nav { margin: 20px 0 0 0; float: left; list-style-type: none; }
+header ul#nav li { margin: 40px 0px auto 10px;  display: inline; }
+header ul#nav li a {
+  padding: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #a3e532;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+header ul#nav li a img {
+  vertical-align: middle;
+}
+header ul#nav li a:hover {
+  color: #fff;
+}
 
-div#subhead_container { height: 30px; width:100%; min-width: 1000px; background-color:#330000; float: left; list-style-type: none; z-index: 998; overflow: hidden; }
-ul#subhead_menu { margin-top: 5px; }
+div#subhead_container {
+  height: 30px;
+  width:100%;
+  min-width: 1000px;
+  float: left;
+  list-style-type: none;
+  z-index: 998;
+  overflow: hidden;
+}
+ul#subhead_menu { margin-top: 5px; margin-left: 75px; }
 ul#subhead_menu li { width: 100%; height: 100%; display: inline; }
-ul#subhead_menu li a { padding: 5px 15px 10px 15px; vertical-align: middle; color: white; font-size: 16px; text-decoration: none; }
-ul#subhead_menu li a:hover { width: 100%; height: 100%; background-color: #grey; }
+ul#subhead_menu li a {
+  padding: 5px 15px 10px 15px;
+  vertical-align: middle;
+  color: white;
+  font-size: 14px;
+  text-decoration: none;
+}
+ul#subhead_menu li a:hover {
+  width: 100%;
+  height: 100%;
+  color: #aaa;
+}
 
-div#searchbar { margin: 24px 30px auto auto; float: right; }
+div#searchbar {
+  margin: 20px 30px auto auto;
+  float: right;
+}
 
-div#main { margin: 0; padding: 80px 0 0 0; }
+div#main {
+  margin: 0;
+  padding-top: 100px;
+}
 
-.table_wrapper { border-radius: 20px; -webkit-border-radius: 20px; -moz-border-radius: 20px; width: 88%; margin: 20px auto 0 auto; padding: 25px; background-color: white; position: relative; min-height: 200px; clear: both; _height: 302px; zoom: 1; }
-.manage_wrapper { width: 88%; margin: 20px auto 0 auto; padding: 25px; min-height: 150px; clear: both; _height: 302px; zoom: 1; }
-.table_wrapper_left { padding: 25px; background-color: #ffffff; float: left; width: 40%; min-height: 100px; margin-top: 25px; margin-left: 30px; margin-right: auto; -moz-border-radius: 20px; border-radius: 20px; }
-.table_wrapper_right{ padding: 25px; background-color: #ffffff; width: 40%; min-height: 100px; margin-top: 25px; margin-left: auto; margin-right: 30px; -moz-border-radius: 20px; border-radius: 20px; }
-
-.configtable { font-size: 14px; line-height:18px; }
-.configtable td { width: 350px; padding: 10px; }
-.configtable td#middle { vertical-align: middle; }
+.table_wrapper {
+  border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  width: 900px;
+  margin: 20px auto 10px auto;
+  padding: 25px;
+  background-color: white;
+  position: relative;
+  clear: both;
+  zoom: 1;
+  -moz-box-shadow: 2px 5px 5px #000;
+  -webkit-box-shadow: 2px 5px 5px #000;
+}
 
 table#artist_table { background-color: white; width: 100%; padding: 20px; }
 
-table#artist_table th#select { text-align: left; }
 table#artist_table th#name { text-align: left; min-width: 200px; }
 table#artist_table th#status { text-align: left; min-width: 50px; }
 table#artist_table th#album { text-align: left; min-width: 300px; }
@@ -154,49 +193,37 @@ table#artist_table td#status { vertical-align: middle; text-align: left; min-wid
 table#artist_table td#album { vertical-align: middle; text-align: left; min-width: 300px; }
 table#artist_table td#have { vertical-align: middle; }
 
-div#paddingheader { padding-top: 48px; font-size: 24px; font-weight: bold; text-align: center; }
-div#nopaddingheader { font-size: 24px; font-weight: bold; text-align: center; }
 table#album_table { background-color: white; }
 
-table#album_table th#select { vertical-align: middle; text-align: left; min-width: 10px; }
+table#album_table th#select { vertical-align: middle; text-align: left; min-width: 25px; }
 table#album_table th#albumart { text-align: left; min-width: 50px; }
 table#album_table th#albumname { text-align: center; min-width: 150px; }
-table#album_table th#reldate { width: 175px; text-align: center; min-width: 70px; }
-table#album_table th#status { width: 175px; text-align: center; min-width: 80px; }
+table#album_table th#reldate { width: 175px; text-align: center; min-width: 100px; }
+table#album_table th#status { width: 175px; text-align: center; min-width: 100px; }
 table#album_table th#type { width: 175px; text-align: center; min-width: 100px; }
-table#album_table th#bitrate { text-align: center; min-width: 60px; }
 table#album_table td#select { vertical-align: middle; text-align: left; }
 table#album_table td#albumart { vertical-align: middle; text-align: left; }
 table#album_table td#albumname { vertical-align: middle; text-align: center; }
 table#album_table td#reldate { vertical-align: middle; text-align: center; }
-table#album_table td#status { vertical-align: middle; text-align: center; font-size: 13px; }
+table#album_table td#status { vertical-align: middle; text-align: center; }
 table#album_table td#type { vertical-align: middle; text-align: center; }
 table#album_table td#have { vertical-align: middle; }
-table#album_table td#bitrate { vertical-align: middle; text-align: center; font-size: 13px; }
 
 img.albumArt { float: left; padding-right: 5px; }
 div#albumheader { padding-top: 48px; height: 200px; }
-div#track_wrapper { margin-left: -50px; padding-top: 20px; font-size: 16px; width: 100%; }
+div#track_wrapper { padding-top: 20px; text-align: center; font-size: 16px; }
 
-table#track_table th#number { text-align: right; min-width: 10px; }
+table#track_table th#number { text-align: right; min-width: 20px; }
 table#track_table th#name { text-align: center; min-width: 350px; }
 table#track_table th#duration { width: 175px; text-align: center; min-width: 100px; }
-table#track_table th#location { text-align: center; width: 250px; }
-table#track_table th#bitrate { text-align: center; min-width: 75px; }
+table#track_table th#have { width: 175px; text-align: center; min-width: 100px; }
 
 table#track_table td#number { vertical-align: middle; text-align: right; }
-table#track_table td#name { vertical-align: middle; text-align: center; font-size: 15px; }
+table#track_table td#name { vertical-align: middle; text-align: center; }
 table#track_table td#duration { vertical-align: middle; text-align: center; }
-table#track_table td#location { vertical-align: middle; text-align: center; font-size: 11px; }
-table#track_table td#bitrate { vertical-align: middle; text-align: center; font-size: 12px; }
+table#track_table td#have { vertical-align: middle; text-align: center; }
 
-table#history_table { background-color: white; width: 100%; font-size: 13px; }
-
-table#history_table td#dateadded { vertical-align: middle; text-align: center; min-width: 150px; font-size: 14px; }
-table#history_table td#filename { vertical-align: middle; text-align: center; min-width: 100px; font-size: 15px; }
-table#history_table td#size { vertical-align: middle; text-align: center; min-width: 75px; font-size: 14px; }
-table#history_table td#status { vertical-align: middle; text-align: center; font-size: 14px; }
-table#history_table td#action { vertical-align: middle; text-align: center; font-size: 14px; }
+table#history_table { background-color: white; width: 100%;  }
 
 table#log_table { background-color: white; }
 
@@ -244,9 +271,8 @@ div.progress-container { border: 1px solid #ccc; width: 100px; height: 14px; mar
 div.progress-container > div { background-color: #a3e532; height: 14px; }
 .havetracks { font-size: 13px; margin-left: 36px; padding-bottom: 3px; vertical-align: middle; }
 
-footer { margin: 20px auto 20px auto; }
+footer { margin: 20px auto 20px auto; color: #aaa; }
 div#version { text-align: center; font-weight: bold; }
-div#donate { text-align: center; margin: 20px auto 20px auto; }
 
 div#shutdown{ text-align: center; vertical-align: middle; }
 
@@ -289,7 +315,6 @@ div#shutdown{ text-align: center; vertical-align: middle; }
 }
 
 @media screen and (max-device-width: 480px) {
-
   html { -webkit-text-size-adjust:none; -ms-text-size-adjust:none; }
 }
 
