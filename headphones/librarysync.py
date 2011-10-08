@@ -47,8 +47,7 @@ def libraryScan(dir=None):
         # Try to read the metadata
         try:
           f = MediaFile(song)
-        except:
-          e = sys.exc_info()[1]
+        except Exception, e:
           logger.error('Got Exception: ' + str(e))
           logger.error('Cannot read file: ' + file)
           continue
