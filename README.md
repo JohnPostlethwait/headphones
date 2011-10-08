@@ -1,4 +1,4 @@
-#![preview thumb](https://github.com/rembo10/headphones/raw/master/data/images/headphoneslogo.png)Headphones
+#![preview thumb](https://github.com/JohnPostlethwait/headphones/raw/master/data/images/headphoneslogo.png)Headphones
 
 ###Installation and Notes
 
@@ -34,7 +34,7 @@ There are still a few things that I'm working on:
 * "Snatched" downloads don't change status to "Downloaded". I'm keeping a database of snatched downloads, but since post-processing doesn't work yet, I didn't want to change the status until the app knows for sure that the album has downloaded.
 
 
-If you run into any more issues, visit http://github.com/rembo10/headphones and report an issue. 
+If you run into any more issues, visit http://github.com/JohnPostlethwait/headphones and report an issue. 
 
 This is free software so feel free to use it/modify it as you wish. 
 

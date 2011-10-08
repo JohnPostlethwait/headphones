@@ -260,8 +260,8 @@ table#wanted_table td#type { vertical-align: middle; text-align: center; min-wid
 table#wanted_table td#status { vertical-align: middle; text-align: center; }
 
 table#searchresults_table th#albumname { text-align: left; min-width: 225px; }
-table#searchresults_table th#artistname { text-align: center; min-width: 325px; }
-table#searchresults_table th#score { text-align: center; min-width: 75px; }
+table#searchresults_table th#artistname { text-align: left; min-width: 325px; }
+table#searchresults_table th#score { text-align: left; min-width: 75px; }
 
 table#searchresults_table td#albumname { vertical-align: middle; text-align: left; min-width: 200px; }
 table#searchresults_table td#artistname { vertical-align: middle; text-align: left; min-width: 300px; }

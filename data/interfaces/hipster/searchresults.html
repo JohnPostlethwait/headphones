@@ -26,11 +26,11 @@
           %>
           <tr class="grade${grade}">
           %if type == 'album':
-            <td id="albumname"><a href="${result['albumurl']}">${result['title']}</a></td>
+            <td id="albumname"><a href="${result['albumurl']}" target="_blank">${result['title']}</a></td>
           %endif
-            <td id="artistname"><a href="${result['url']}">${result['uniquename']}</a></td>
+            <td id="artistname"><a href="${result['url']}" target="_blank">${result['uniquename']}</a></td>
             <td id="score">${result['score']}</td>
-          %if type == 'album':  
+          %if type == 'album':
             <td id="add"><a href="addReleaseById?rid=${result['albumid']}">Add this album</a></td>
           %else:
             <td id="add"><a href="addArtist?artistid=${result['id']}">Add this artist</a></td>
@@ -50,21 +50,23 @@
 <%def name="javascriptIncludes()">
   <script src="js/libs/jquery.dataTables.min.js"></script>
   <script>
-  $(document).ready(function()
-  {
-    $('#searchresults_table').dataTable(
-      {
+    $(document).ready( function() {
+      $('#searchresults_table').dataTable( {
+        "aoColumns": [
+          { "sType": "title-string"},
+          { "sType": "title-string"},
+          { "bSortable": false }
+        ],
         "oLanguage": {
-          "sLengthMenu":"Show _MENU_ results per page",
-          "sEmptyTable": "No results",
-          "sInfo":"Showing _START_ through _END_ of _TOTAL_ results",
-          "sInfoEmpty":"Showing 0 of 0 results",
-          "sInfoFiltered":"(filtered from _MAX_ total results)"},
-        "iDisplayLength": 25,
-        "sPaginationType": "full_numbers",
+          "sLengthMenu":    "Show _MENU_ results per page",
+          "sEmptyTable":    "No results",
+          "sInfo":          "Showing _START_ through _END_ of _TOTAL_ results",
+          "sInfoEmpty":     "Showing 0 of 0 results",
+          "sInfoFiltered":  "(filtered from _MAX_ total results)" },
+        "iDisplayLength":   25,
+        "sPaginationType":  "full_numbers",
         "aaSorting": []
-
-      });
-  });
+      } ) ;
+    } );
   </script>
 </%def>

@@ -89,7 +89,7 @@ def checkGithub():
   latest_commit = None
 
   gh = github.GitHub()
-  
+
   for curCommit in gh.commits.forBranch('JohnPostlethwait', 'headphones', version.HEADPHONES_VERSION):
     if not latest_commit:
       latest_commit = curCommit.id
@@ -127,7 +127,7 @@ def update():
         logger.error('Unable to update from git: '+line)
         logger.info('Output: ' + str(output))
   else:
-    tar_download_url = 'http://github.com/rembo10/headphones/tarball/'+version.HEADPHONES_VERSION
+    tar_download_url = 'http://github.com/JohnPostlethwait/headphones/tarball/'+version.HEADPHONES_VERSION
     update_dir = os.path.join(headphones.PROG_DIR, 'update')
     version_path = os.path.join(headphones.PROG_DIR, 'version.txt')
 

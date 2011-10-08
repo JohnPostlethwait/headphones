@@ -47,15 +47,12 @@
 <%def name="javascriptIncludes()">
   <script src="js/libs/jquery.dataTables.min.js"></script>
   <script>
-  $(document).ready(function()
-  {
-    $('#artist_table').dataTable(
-      {
+    $(document).ready( function() {
+      $('#artist_table').dataTable( {
         "aaSorting": [[1, 'asc']],
         "bStateSave": false,
         "bPaginate": false
-        
-      });
-  });
+      } );
+    } );
   </script>
 </%def>
