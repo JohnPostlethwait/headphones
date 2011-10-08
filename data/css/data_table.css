@@ -1,11 +1,4 @@
 .dataTables_wrapper {
-	border-radius: 20px;
-	-webkit-border-radius: 20px;
-	-moz-border-radius: 20px;
-	width: 88%;
-	margin: 20px auto 0 auto;
-	padding: 25px;
-	background-color: white;
 	position: relative;
 	min-height: 155px;
 	clear: both;
@@ -35,10 +28,8 @@
 }
 
 .dataTables_filter {
-	width: 50%;
 	float: right;
 	text-align: right;
-	margin-bottom: 15px;
 }
 
 .dataTables_info {
@@ -107,7 +98,7 @@ table.display thead th {
 	padding: 3px 18px 3px 10px;
 	background-color: white;
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 18px;
 	cursor: pointer;
 	* cursor: hand;
 }
@@ -198,7 +189,7 @@ table.display tr.even.gradeU {
 
 
 table.display tr.odd.gradeZ {
-	background-color: #FCFAFA;
+	background-color: #f3f3f3;
 }
 
 table.display tr.even.gradeZ {

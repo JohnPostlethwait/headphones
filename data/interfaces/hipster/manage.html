@@ -1,59 +1,68 @@
 <%inherit file="base.html" />
 
-<%def name="body()">
-  <div id="paddingheader">
-    <h1>Manage Artists <small><a href="extras">Artists You May Like</a><h1>
+<%def name="headerIncludes()">
+  <div id="subhead_container">
+    <ul id="subhead_menu">
+      <li><a href="extras">Artists You May Like</a></li>
+    </ul>
   </div>
+</%def>
 
+<%def name="body()">
   <form action="markArtists" method="get">
-    <p class="indented">
-      <select name="action">
+    <div class="table_wrapper table_sorting">
+      <h1 class="left">Manage Artists</h1>
+
+      <p class="right">
+        <select name="action">
           <option value="pause">Pause</option>
           <option value="resume">Resume</option>
           <option value="refresh">Refresh</option>
           <option value="delete">Delete</option>
-      </select>
-      selected artists
-      <input type="submit" value="Go">
-    </p>
-    <table class="display" id="artist_table">
-      <thead>
-        <tr>
-          <th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-          <th id="name">Artist Name</th>
-          <th id="status">Status</th>
-          <th id="album">Latest Album</th>
-        </tr>
-      </thead>
-      <tbody>
-      %for artist in artists:
-        <%
-          if artist['Status'] == 'Paused':
-            grade = 'X'
-          elif artist['Status'] == 'Loading':
-            grade = 'C'
-          else:
-            grade = 'Z'
+        </select>
+        selected artists
+        <input type="submit" value="Go">
+      </p>
 
-          if artist['ReleaseDate'] and artist['LatestAlbum']:
-            releasedate = artist['ReleaseDate']
-            albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])  
-          elif artist['LatestAlbum']:
-            releasedate = ''
-            albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
-          else:
-            releasedate = ''
-            albumdisplay = '<i>None</i>'
-        %>
-        <tr class="grade${grade}">
-          <td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-          <td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-          <td id="status">${artist['Status']}</td>  
-          <td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-        </tr>
-      %endfor
-      </tbody>
-    </table>
+      <table class="display" id="artist_table">
+        <thead>
+          <tr>
+            <th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+            <th id="name">Artist Name</th>
+            <th id="status">Status</th>
+            <th id="album">Latest Album</th>
+          </tr>
+        </thead>
+        <tbody>
+        %for artist in artists:
+          <%
+            if artist['Status'] == 'Paused':
+              grade = 'X'
+            elif artist['Status'] == 'Loading':
+              grade = 'C'
+            else:
+              grade = 'Z'
+
+            if artist['ReleaseDate'] and artist['LatestAlbum']:
+              releasedate = artist['ReleaseDate']
+              albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])  
+            elif artist['LatestAlbum']:
+              releasedate = ''
+              albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
+            else:
+              releasedate = ''
+              albumdisplay = '<i>None</i>'
+          %>
+          <tr class="grade${grade}">
+            <td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
+            <td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+            <td id="status">${artist['Status']}</td>  
+            <td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+          </tr>
+        %endfor
+        </tbody>
+      </table>
+    </div>
   </form>
 </%def>
 
@@ -64,19 +73,17 @@
 <%def name="javascriptIncludes()">
   <script src="js/libs/jquery.dataTables.min.js"></script>
   <script>
-  $(document).ready(function()
-  {
-    $('#artist_table').dataTable(
-      {
+    $(document).ready( function() {
+      $('#artist_table').dataTable( {
         "aoColumns": [
-          null,
+          { "bSortable": false },
           { "sType": "title-string" },
           null,
           { "sType": "title-string" }
         ],
         "bStateSave": true,
         "bPaginate": false
-      });
-  });
+      } );
+    } );
   </script>
 </%def>
