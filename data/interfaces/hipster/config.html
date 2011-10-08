@@ -253,37 +253,9 @@
         <input type="checkbox" name="embed_lyrics" id="embed_lyrics" value="1" ${config['embed_lyrics']} />
         <label for="embed_lyrics">Embed Lyrics</label>
       </fieldset>
-    </div>
-
-    <div class="table_wrapper">
-      <h1><img src="images/advanced.png"> Advanced Settings</h1>
 
       <fieldset>
-        <legend>Renaming Options</legend>
-
-        <label for="folder_format">Folder Format</label>
-        <input type="text" name="folder_format" id="folder_format" value="${config['folder_format']}" />
-        <br />
-        <small>
-          Use: artist, album, year and first (first letter in artist name)
-          <br />
-          EG: first/artist/album [year] = G/Girl Talk/All Day [2010]
-        </small>
-        <br />
-        <label for="file_format">File Format</label>
-        <input type="text" id="file_format" name="file_format" value="${config['file_format']}" />
-        <small>Use: tracknumber, title, artist, album and year</small>
-      </fieldset>
-
-      <fieldset>
-        <legend>Miscellaneous</legend>
-
-        <label for="log_dir">Log Directory</label>
-        <input type="text" id="log_dir" name="log_dir" value="${config['log_dir']}" size="55" />
-      </fieldset>
-
-      <fieldset>
-        <legend>Encoding</legend>
+        <legend>Post-Download Encoding</legend>
         <p>This option requires the lame or ffmpeg encoder.</p>
 
         <input type="checkbox" name="encode" id="encode" value="1" ${config['encode']}/>
@@ -391,6 +363,34 @@
           <label for="encoderfolder">Path to Encoder</label>
           <input type="text" id="encoderfolder" name="encoderfolder" value="${config['encoderfolder']}" />
         </div>
+      </fieldset>
+    </div>
+
+    <div class="table_wrapper">
+      <h1><img src="images/advanced.png"> Advanced Settings</h1>
+
+      <fieldset>
+        <legend>Renaming Options</legend>
+
+        <label for="folder_format">Folder Format</label>
+        <input type="text" name="folder_format" id="folder_format" value="${config['folder_format']}" />
+        <br />
+        <small>
+          Use: artist, album, year and first (first letter in artist name)
+          <br />
+          EG: first/artist/album [year] = G/Girl Talk/All Day [2010]
+        </small>
+        <br />
+        <label for="file_format">File Format</label>
+        <input type="text" id="file_format" name="file_format" value="${config['file_format']}" />
+        <small>Use: tracknumber, title, artist, album and year</small>
+      </fieldset>
+
+      <fieldset>
+        <legend>Miscellaneous</legend>
+
+        <label for="log_dir">Log Directory</label>
+        <input type="text" id="log_dir" name="log_dir" value="${config['log_dir']}" size="55" />
       </fieldset>
     </div>
 
