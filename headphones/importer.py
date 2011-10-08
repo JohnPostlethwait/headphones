@@ -117,11 +117,6 @@ def addArtisttoDB(artistid, extrasonly=False):
         "Status":       "Wanted"
       }
 
-      # if release_dict['releasedate'] > helpers.today():
-      #   newValueDict['Status'] = "Wanted"
-      # else:
-      #   newValueDict['Status'] = "Skipped"
-
     myDB.upsert("albums", newValueDict, controlValueDict)
 
     try:

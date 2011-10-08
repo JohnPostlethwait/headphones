@@ -16,8 +16,7 @@ from headphones.helpers import checked, radio
 
 
 def serve_template(templatename, **kwargs):
-  interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
-  template_dir = os.path.join(str(interface_dir), headphones.INTERFACE)
+  template_dir = os.path.join(str(headphones.PROG_DIR), 'data/views/')
 
   _hplookup = TemplateLookup(directories=[template_dir])
 
@@ -296,9 +295,6 @@ class WebInterface(object):
 
   @cherrypy.expose
   def config(self):
-    interface_dir = os.path.join(headphones.PROG_DIR, 'data/interfaces/')
-    interface_list = [ name for name in os.listdir(interface_dir) if os.path.isdir(os.path.join(interface_dir, name)) ]
-
     config = { 
           "http_host" : headphones.HTTP_HOST,
           "http_user" : headphones.HTTP_USERNAME,
@@ -344,7 +340,6 @@ class WebInterface(object):
           "file_format" : headphones.FILE_FORMAT,
           "include_extras" : checked(headphones.INCLUDE_EXTRAS),
           "log_dir" : headphones.LOG_DIR,
-          "interface_list" : interface_list,
           "encode":   checked(headphones.ENCODE),
           "encoder":    headphones.ENCODER,
           "bitrate":    int(headphones.BITRATE),
@@ -356,14 +351,14 @@ class WebInterface(object):
           "encoderquality": headphones.ENCODERQUALITY,
           "encoderlossless": checked(headphones.ENCODERLOSSLESS)
         }
-    return serve_template(templatename="config.html", title="Settings", config=config)  
+    return serve_template(templatename="config.html", title="Settings", config=config)
 
   @cherrypy.expose
   def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
     sab_host=None, sab_username=None, sab_apikey=None, sab_password=None, sab_category=None, download_dir=None, blackhole=0, blackhole_dir=None,
     usenet_retention=None, nzbmatrix=0, nzbmatrix_username=None, nzbmatrix_apikey=None, newznab=0, newznab_host=None, newznab_apikey=None,
-    nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0, 
-    rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, interface=None, log_dir=None,
+    nzbsorg=0, nzbsorg_uid=None, nzbsorg_hash=None, newzbin=0, newzbin_uid=None, newzbin_password=None, preferred_quality=0, preferred_bitrate=None, detect_bitrate=0, move_files=0,
+    rename_files=0, correct_metadata=0, cleanup_files=0, add_album_art=0, embed_album_art=0, embed_lyrics=0, destination_dir=None, folder_format=None, file_format=None, include_extras=0, log_dir=None,
     encode=0, encoder=None, bitrate=None, samplingfrequency=None, encoderfolder=None, advancedencoder=None, encoderoutputformat=None, encodervbrcbr=None, encoderquality=None, encoderlossless=0):
 
     headphones.HTTP_HOST = http_host
@@ -406,7 +401,6 @@ class WebInterface(object):
     headphones.FOLDER_FORMAT = folder_format
     headphones.FILE_FORMAT = file_format
     headphones.INCLUDE_EXTRAS = include_extras
-    headphones.INTERFACE = interface
     headphones.LOG_DIR = log_dir
     headphones.ENCODE = encode
     headphones.ENCODER = encoder

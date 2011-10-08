@@ -110,7 +110,6 @@ LASTFM_USERNAME = None
 
 MEDIA_FORMATS = ["mp3", "flac", "aac", "ogg", "ape", "m4a"]
 
-INTERFACE = None
 FOLDER_PERMISSIONS = None
 
 ENCODE = False
@@ -173,7 +172,6 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 def initialize():
 
     with INIT_LOCK:
-    
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
@@ -181,13 +179,13 @@ def initialize():
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
-                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, INTERFACE, FOLDER_PERMISSIONS, \
+                NZBSORG, NZBSORG_UID, NZBSORG_HASH, NEWZBIN, NEWZBIN_UID, NEWZBIN_PASSWORD, LASTFM_USERNAME, FOLDER_PERMISSIONS, \
                 ENCODERFOLDER, ENCODER, BITRATE, SAMPLINGFREQUENCY, ENCODE, ADVANCEDENCODER, ENCODEROUTPUTFORMAT, ENCODERQUALITY, ENCODERVBRCBR, \
                 ENCODERLOSSLESS
-                
+
         if __INITIALIZED__:
             return False
-                
+
         # Make sure all the config sections exist
         CheckSection('General')
         CheckSection('SABnzbd')
@@ -195,7 +193,7 @@ def initialize():
         CheckSection('Newznab')
         CheckSection('NZBsorg')
         CheckSection('Newzbin')
-        
+
         # Set global variables based on config file or use defaults
         try:
             HTTP_PORT = check_setting_int(CFG, 'General', 'http_port', 8181)
@@ -261,10 +259,9 @@ def initialize():
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
         LASTFM_USERNAME = check_setting_str(CFG, 'General', 'lastfm_username', '')
-        
-        INTERFACE = check_setting_str(CFG, 'General', 'interface', 'default')
+
         FOLDER_PERMISSIONS = check_setting_str(CFG, 'General', 'folder_permissions', '0755')
-		
+
         ENCODERFOLDER = check_setting_str(CFG, 'General', 'encoderfolder', '')        
         ENCODER = check_setting_str(CFG, 'General', 'encoder', 'ffmpeg')
         BITRATE = check_setting_int(CFG, 'General', 'bitrate', 192)
@@ -275,7 +272,7 @@ def initialize():
         ENCODERQUALITY = check_setting_int(CFG, 'General', 'encoderquality', 2)
         ENCODERVBRCBR = check_setting_str(CFG, 'General', 'encodervbrcbr', 'cbr')
         ENCODERLOSSLESS = bool(check_setting_int(CFG, 'General', 'encoderlossless', 1))
-        
+
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
         
@@ -443,14 +440,13 @@ def config_write():
     new_config['NZBsorg']['nzbsorg'] = int(NZBSORG)
     new_config['NZBsorg']['nzbsorg_uid'] = NZBSORG_UID
     new_config['NZBsorg']['nzbsorg_hash'] = NZBSORG_HASH
-    
+
     new_config['Newzbin'] = {}
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_uid'] = NEWZBIN_UID
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
-    
+
     new_config['General']['lastfm_username'] = LASTFM_USERNAME
-    new_config['General']['interface'] = INTERFACE
     new_config['General']['folder_permissions'] = FOLDER_PERMISSIONS
 
     new_config['General']['encode'] = int(ENCODE)
@@ -463,7 +459,7 @@ def config_write():
     new_config['General']['encoderquality'] = ENCODERQUALITY
     new_config['General']['encodervbrcbr'] = ENCODERVBRCBR
     new_config['General']['encoderlossless'] = ENCODERLOSSLESS
-    
+
     new_config.write()
 
     
