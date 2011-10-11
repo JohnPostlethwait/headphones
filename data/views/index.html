@@ -34,7 +34,7 @@
             <th id="name">Artist Name</th>
             <th id="status">Status</th>
             <th id="album">Latest Album</th>
-            <th>Last Release</th>
+            <th style="min-width:120px;">Last Release</th>
             <th id="have">Tracks</th>
           </tr>
         </thead>
@@ -73,8 +73,7 @@
               ${artist['Status']}
             </td>
             <td id="album">
-              <span title="${artist['ReleaseDate']}"></span>
-              <a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum'] if artist['LatestAlbum'] else ''}</a>
+              <a title="${artist['LatestAlbum']}" href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum'] if artist['LatestAlbum'] else ''}</a>
             </td>
             <td>
               ${artist['ReleaseDate'] if artist['ReleaseDate'] else ''}
