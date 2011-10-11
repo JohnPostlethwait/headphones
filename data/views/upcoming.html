@@ -52,10 +52,18 @@
         <tbody>
         %for album in wanted:
           <tr class="gradeZ">
-            <td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
-            <td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
-            <td id="artistname">${album['ArtistName']}</td>
-            <td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+            <td id="select">
+              <input type="checkbox" name="${album['AlbumID']}" class="checkbox" />
+            </th>
+            <td id="albumart">
+              <img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50" />
+            </td>
+            <td id="artistname">
+              <a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a>
+            </td>
+            <td id="albumname">
+              <a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a>
+            </td>
             <td id="reldate">${album['ReleaseDate']}</td>
             <td id="type">${album['Type']}</td>
           </tr>
@@ -78,9 +86,9 @@
         "aoColumns": [
           { "bSortable": false },
           { "bSortable": false },
-          { "sType": "title-string" },
-          { "sType": "title-string" },
-          { "sType": "title-string" },
+          { "sType": "string" },
+          { "sType": "string" },
+          { "sType": "date" },
           { "sType": "title-string" }
         ],
         "bFilter": false,
