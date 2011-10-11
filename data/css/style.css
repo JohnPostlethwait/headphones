@@ -171,7 +171,7 @@ div#main {
   border-radius: 20px;
   -webkit-border-radius: 20px;
   -moz-border-radius: 20px;
-  width: 900px;
+  width: 950px;
   margin: 20px auto 10px auto;
   padding: 25px;
   background-color: white;
@@ -182,7 +182,6 @@ div#main {
   -webkit-box-shadow: 2px 5px 5px #000;
 }
 
-table#artist_table { background-color: white; width: 100%; padding: 20px; }
 
 table#artist_table th#name { text-align: left; min-width: 200px; }
 table#artist_table th#status { text-align: left; min-width: 50px; }
