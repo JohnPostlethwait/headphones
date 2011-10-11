@@ -28,10 +28,13 @@
       <table class="display" id="artist_table">
         <thead>
           <tr>
-            <th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+            <th id="select">
+              <input type="checkbox" onClick="toggle(this)" />
+            </th>
             <th id="name">Artist Name</th>
             <th id="status">Status</th>
             <th id="album">Latest Album</th>
+            <th>Last Release</th>
             <th id="have">Tracks</th>
           </tr>
         </thead>
@@ -51,31 +54,39 @@
               percent = 0
               totaltracks = '?'
 
-            if artist['ReleaseDate'] and artist['LatestAlbum']:
-              releasedate = artist['ReleaseDate']
-              albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])
-              if releasedate > helpers.today():
-                grade = 'A'
-              else:
-                grade = 'Z'
-            elif artist['LatestAlbum']:
-              releasedate = ''
-              grade = 'Z'
-              albumdisplay = '<i>%s</i>' % artist['LatestAlbum']
-            else:
-              releasedate = ''
-              grade = 'Z'
-              albumdisplay = '<i>None</i>'
-
             if artist['Status'] == 'Paused':
               grade = 'X'
+            elif artist['ReleaseDate'] and artist['ReleaseDate'] > helpers.today():
+              grade = 'A'
+            else:
+              grade = 'Z'
           %>
           <tr class="grade${grade}">
-            <td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-            <td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-            <td id="status">${artist['Status']}</td>
-            <td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-            <td id="have"><span title="${percent}"></span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
+            <td id="select">
+              <input type="checkbox" name="${artist['ArtistID']}" class="checkbox" />
+            </td>
+            <td id="name">
+              <span title="${artist['ArtistSortName']}"></span>
+              <a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a>
+            </td>
+            <td id="status">
+              ${artist['Status']}
+            </td>
+            <td id="album">
+              <span title="${artist['ReleaseDate']}"></span>
+              <a href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum'] if artist['LatestAlbum'] else ''}</a>
+            </td>
+            <td>
+              ${artist['ReleaseDate'] if artist['ReleaseDate'] else ''}
+            </td>
+            <td id="have">
+              <span title="${percent}"></span>
+              <div class="progress-container">
+                <div style="width:${percent}%">
+                  <div class="havetracks">${havetracks}/${totaltracks}</div>
+                </div>
+              </div>
+            </td>
           </tr>
         %endfor
         </tbody>
@@ -98,6 +109,7 @@
             { "sType": "title-string"},
             null,
             { "sType": "title-string"},
+            { "sType": "date"},
             { "sType": "title-numeric"}
           ],
           "bStateSave": true,

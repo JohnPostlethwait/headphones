@@ -7,9 +7,6 @@
 <%def name="headerIncludes()">
   <div id="subhead_container">
     <ul id="subhead_menu">
-      %if not headphones.ADD_ARTISTS:
-      <li><a href="manageNew">Manage New Artists</a></li>
-      %endif
       <li><a href="forceUpdate">Update Active Artists</a></li>
       <li><a href="forceSearch">Check for Wanted Albums</a></li>
       <li><a href="checkGithub">Check for Updates</a></li>
@@ -41,9 +38,7 @@
         <input type="text" id="path" name="path" size="50" />
       %endif
       <br />
-      <input type="checkbox" id="autoadd" name="autoadd" value="1" ${checked(headphones.ADD_ARTISTS)}>
-      <label for="autoadd">Automatically add new artists</label>
-      <br /><br />
+      <br />
       <input type="submit" value="Start Scanning" />
     </form>
   </div>

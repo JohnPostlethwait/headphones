@@ -231,8 +231,7 @@ class WebInterface(object):
     raise cherrypy.HTTPRedirect("index")
 
   @cherrypy.expose
-  def musicScan(self, path, redirect=None, autoadd=0):
-    headphones.ADD_ARTISTS = autoadd
+  def musicScan(self, path, redirect=None):
     headphones.MUSIC_DIR = path
     headphones.config_write()
     try:

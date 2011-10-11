@@ -65,7 +65,6 @@ PATH_TO_XML = None
 PREFERRED_QUALITY = None
 PREFERRED_BITRATE = None
 DETECT_BITRATE = False
-ADD_ARTISTS = False
 NEW_ARTISTS = []
 CORRECT_METADATA = False
 MOVE_FILES = False
@@ -175,7 +174,7 @@ def initialize():
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
                 CURRENT_VERSION, LATEST_VERSION, MUSIC_DIR, DESTINATION_DIR, PREFERRED_QUALITY, PREFERRED_BITRATE, DETECT_BITRATE, \
-                ADD_ARTISTS, CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
+                CORRECT_METADATA, MOVE_FILES, RENAME_FILES, FOLDER_FORMAT, FILE_FORMAT, CLEANUP_FILES, INCLUDE_EXTRAS, \
                 ADD_ALBUM_ART, EMBED_ALBUM_ART, EMBED_LYRICS, DOWNLOAD_DIR, BLACKHOLE, BLACKHOLE_DIR, USENET_RETENTION, NZB_SEARCH_INTERVAL, \
                 LIBRARYSCAN_INTERVAL, DOWNLOAD_SCAN_INTERVAL, SAB_HOST, SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, \
                 NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, NEWZNAB, NEWZNAB_HOST, NEWZNAB_APIKEY, \
@@ -216,7 +215,6 @@ def initialize():
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
         PREFERRED_BITRATE = check_setting_int(CFG, 'General', 'preferred_bitrate', '')
         DETECT_BITRATE = bool(check_setting_int(CFG, 'General', 'detect_bitrate', 0))
-        ADD_ARTISTS = bool(check_setting_int(CFG, 'General', 'auto_add_artists', 1))
         CORRECT_METADATA = bool(check_setting_int(CFG, 'General', 'correct_metadata', 0))
         MOVE_FILES = bool(check_setting_int(CFG, 'General', 'move_files', 0))
         RENAME_FILES = bool(check_setting_int(CFG, 'General', 'rename_files', 0))
@@ -399,7 +397,6 @@ def config_write():
     new_config['General']['preferred_quality'] = PREFERRED_QUALITY
     new_config['General']['preferred_bitrate'] = PREFERRED_BITRATE
     new_config['General']['detect_bitrate'] = int(DETECT_BITRATE)
-    new_config['General']['auto_add_artists'] = int(ADD_ARTISTS)
     new_config['General']['correct_metadata'] = int(CORRECT_METADATA)
     new_config['General']['move_files'] = int(MOVE_FILES)
     new_config['General']['rename_files'] = int(RENAME_FILES)
