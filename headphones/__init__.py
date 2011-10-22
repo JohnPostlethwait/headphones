@@ -478,7 +478,7 @@ def dbcheck():
     c = conn.cursor()
 
     # Artists Table
-    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_clean_name TEXT NOT NULL, artist_location TEXT UNIQUE, artist_image_url TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_clean_name TEXT NOT NULL, artist_location TEXT UNIQUE, artist_image_url TEXT, artist_small_image_url TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
     # Albums (Releases) Table
     c.execute('CREATE TABLE IF NOT EXISTS albums (album_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_release_id TEXT, album_image_url TEXT, artist_id INTEGER NOT NULL, album_name TEXT, album_location TEXT UNIQUE, album_type TEXT, album_released_on TEXT, album_added_on TEXT DEFAULT CURRENT_TIMESTAMP, album_state TEXT, FOREIGN KEY(artist_id) REFERENCES artists(artist_id))')
     # Tracks Table

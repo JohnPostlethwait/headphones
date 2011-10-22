@@ -65,20 +65,19 @@ def scan():
           try:
             artist = discogs.Artist( id3_artist )
             artist_info = artist.data
+            image_url = None
+            image_small_url = None
 
             # Loop through all of the artist images and select the "primary" one for storage in the DB.
             if artist_info.get('images'):
-              image_url = None
-
               for i in artist_info['images']:
-                if i['type'] == 'primary':
+                if i['type'] != 'primary':
                   image_url = i['uri']
+                  image_small_url = i['uri150']
                   break
-            else:
-              image_url = None
 
-            artist_record = connection.action('INSERT INTO artists (artist_name, artist_clean_name, artist_image_url, artist_location, artist_state) VALUES(?, ?, ?, ?, ?)',
-                            [artist_info['name'], helpers.cleanName(artist_info['name']), image_url, full_path, 'wanted'])
+            artist_record = connection.action('INSERT INTO artists (artist_name, artist_clean_name, artist_image_url, artist_small_image_url, artist_location, artist_state) VALUES(?, ?, ?, ?, ?, ?)',
+                            [artist_info['name'], helpers.cleanName(artist_info['name']), image_url, image_small_url, full_path, 'wanted'])
 
             # getReleases( artist.releases, artist_record['id'] )
 

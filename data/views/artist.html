@@ -6,22 +6,24 @@
 <%def name="headerIncludes()">
   <div id="subhead_container">
     <ul id="subhead_menu">
-      <li><a href="refreshArtist?id=${artist['id']}">Refresh Artist</a></li>
-      <li><a href="deleteArtist?id=${artist['id']}">Delete Artist</a></li>
-      %if artist['state'] == 'paused':
-        <li><a href="resumeArtist?id=${artist['id']}">Resume Artist</a></li>
+      <li><a href="refreshArtist?id=${artist['artist_id']}">Refresh Artist</a></li>
+      <li><a href="deleteArtist?id=${artist['artist_id']}">Delete Artist</a></li>
+      %if artist['artist_state'] == 'paused':
+        <li><a href="resumeArtist?id=${artist['artist_id']}">Resume Artist</a></li>
       %else:
-        <li><a href="pauseArtist?id=${artist['id']}">Pause Artist</a></li>
+        <li><a href="pauseArtist?id=${artist['artist_id']}">Pause Artist</a></li>
       %endif
     </ul>
   </div>
 </%def>
 
 <%def name="body()">
-  <form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['id']}>
+  <form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['artist_id']}>
     <div class="table_wrapper table_sorting">
-      <h1 class="left">${artist['name']}</h1>
-      %if artist['state'] == 'loading':
+      <img class="left" height="50" src="${artist['artist_small_image_url']}" alt="${artist['artist_name']}" />
+      <h1 class="left">${artist['artist_name']}</h1>
+
+      %if artist['artist_state'] == 'loading':
         <p> (Album information for this artist is currently being loaded)</p>
       %endif
 
@@ -48,52 +50,83 @@
             <th id="bitrate">Bitrate</th>
           </tr>
         </thead>
+
         <tbody>
         %for album in albums:
           <%
-            if album['state'] == 'skipped':
+            if album['album_state'] == 'skipped':
               grade = 'Z'
-            elif album['state'] == 'wanted':
+            elif album['album_state'] == 'wanted':
               grade = 'X'
-            elif album['state'] == 'snatched':
+            elif album['album_state'] == 'snatched':
               grade = 'C'
             else:
               grade = 'A'
+          %>
 
-            myDB = db.DBConnection()
-            totaltracks = len(myDB.select('SELECT title from tracks WHERE album_id=?', [album['id']]))
-            havetracks = len(myDB.select('SELECT title from tracks WHERE album_id=? AND location IS NOT NULL', [album['id']]))
+          <%
+            total_tracks = db.DBConnection().action('SELECT COUNT(*) AS count, AVG(track_bitrate) AS bitrate FROM tracks WHERE album_id=?', [album['album_id']]).fetchone()
+            bitrate = total_tracks['bitrate']
+            total_tracks = total_tracks['count']
+          %>
+
+          <%
+            obtained_tracks = db.DBConnection().action('SELECT COUNT(*) AS count FROM tracks WHERE album_id=? AND track_location IS NOT NULL', [album['album_id']]).fetchone()
+            obtained_tracks = obtained_tracks['count']
+          %>
+
+          <%
             try:
-              percent = (havetracks*100.0)/totaltracks
-              if percent > 100:
-                percent = 100
+              percent = (obtained_tracks * 100.0) / total_tracks
+
+              if percent > 100: percent = 100
             except (ZeroDivisionError, TypeError):
               percent = 0
-              totaltracks = '?'
-
-            avgbitrate = myDB.action("SELECT AVG(bit_rate) FROM tracks WHERE album_id=?", [album['id']]).fetchone()[0]
-            if avgbitrate:
-              bitrate = str(int(avgbitrate)/1000) + ' kbps'
-            else:
-              bitrate = ''
           %>
           <tr class="grade${grade}">
-            <td id="select"><input type="checkbox" name="${album['id']}" class="checkbox" /></td>
-            <td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['id']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
-            <td id="albumname"><a href="album?id=${album['id']}">${album['title']}</a></td>
-            <td id="reldate">${album['ReleaseDate']}</td>
-            <td id="type">${album['type']}</td>
-            <td id="status">${album['state']}
-            %if album['state'] == 'skipped':
-              [<a href="queueAlbum?album_id=${album['id']}&album_id=${album['artist_id']}">want</a>]
-            %elif album['state'] == 'wanted':
-              [<a href="unqueueAlbum?album_id=${album['id']}&album_id=${album['artist_id']}">skip</a>]
+            <td id="select">
+              <input type="checkbox" name="${album['album_id']}" class="checkbox" />
+            </td>
+
+            <td id="albumart">
+              <img src="${album['album_image_url']}" height="50" width="50">
+            </td>
+
+            <td id="albumname">
+              <a href="album?id=${album['album_id']}">${album['album_name']}</a>
+            </td>
+
+            <td id="reldate">
+              ${album['album_released_on']}
+            </td>
+
+            <td id="type">
+              ${album['album_type']}
+            </td>
+
+            <td id="status">
+              ${album['album_state']}
+            %if album['album_state'] == 'skipped':
+              [<a href="queueAlbum?album_id=${album['album_id']}&album_id=${album['artist_id']}">want</a>]
+            %elif album['album_state'] == 'wanted':
+              [<a href="unqueueAlbum?album_id=${album['album_id']}&album_id=${album['artist_id']}">skip</a>]
             %else:
-              [<a href="queueAlbum?album_id=${album['id']}&album_id=${album['artist_id']}" title="Retry the same download again">retry</a>][<a href="queueAlbum?album_id=${album['id']}&artist_id=${album['artist_id']}&new=True" title="Try a new download, skipping all previously tried nzbs">new</a>]
+              [<a href="queueAlbum?album_id=${album['album_id']}&album_id=${album['artist_id']}" title="Retry the same download again">retry</a>][<a href="queueAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}&new=True" title="Try a new download, skipping all previously tried nzbs">new</a>]
             %endif
             </td>
-            <td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
-            <td id="bitrate">${bitrate}</td>
+
+            <td id="have">
+              <span title="${percent}"><span>
+              <div class="progress-container">
+                <div style="width:${percent}%">
+                  <div class="havetracks">${obtained_tracks}/${total_tracks}</div>
+                </div>
+              </div>
+            </td>
+
+            <td id="bitrate">
+              ${bitrate}
+            </td>
           </tr>
         %endfor
         </tbody>

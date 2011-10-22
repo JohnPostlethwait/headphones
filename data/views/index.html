@@ -33,10 +33,10 @@
               <input type="checkbox" onClick="toggle(this)" />
             </th>
             <th id="name">Artist Name</th>
-            <th id="status">Status</th>
             <th id="album">Latest Album</th>
             <th style="min-width:120px;">Release Date</th>
             <th id="have">Tracks</th>
+            <th id="status">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -59,10 +59,6 @@
               <a href="artist?artist_id=${artist['artist_id']}">${artist['artist_name']}</a>
             </td>
 
-            <td id="status">
-              ${artist['artist_state']}
-            </td>
-
             <td id="album">
               <%
                 latest_album = db.DBConnection().action('SELECT album_id, album_name, MAX(album_released_on) AS album_released_on FROM albums WHERE artist_id = ?', [artist['artist_id']]).fetchone()
@@ -74,7 +70,7 @@
 
             <td>
               % if latest_album['album_released_on']:
-                ${latest_album['album_released_on']}
+                <p class="center">${latest_album['album_released_on']}</p>
               % endif
             </td>
 
@@ -104,6 +100,10 @@
                   <div class="havetracks">${obtained_tracks}/${total_tracks}</div>
                 </div>
               </div>
+            </td>
+
+            <td id="status">
+              ${artist['artist_state']}
             </td>
           </tr>
         %endfor
