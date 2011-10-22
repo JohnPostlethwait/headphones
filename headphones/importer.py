@@ -1,68 +1,83 @@
 from lib.pyItunes import *
+
 import time
 import os
+
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import logger, helpers, db, mb, albumart, lastfm
+
+from headphones import logger
+from headphones import helpers
+from headphones import db
+from headphones import mb
+from headphones import albumart
+from headphones import lastfm
 
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
 
-def if_exists(artistid):
+
+
+
+# See if the artist is already in the database.
+def artistAlreadyTracked(mb_id):
   myDB = db.DBConnection()
+  artists = myDB.select('SELECT ArtistID, ArtistName from artists WHERE mb_id=?', [mb_id])
 
-  # See if the artist is already in the database
-  artistlist = myDB.select('SELECT ArtistID, ArtistName from artists WHERE ArtistID=?', [artistid])
-
-  if any(artistid in x for x in artistlist):
-    logger.info(artistlist[0][1] + u" is already in the database. Updating 'have tracks', but not artist information")
+  if any(mb_id in x for x in artists):
     return True
   else:
     return False
 
-def artistlist_to_mbids(artistlist, forced=False):
+
+def artistNamesToMusicBrainzIds(artistlist):
   for artist in artistlist:
-    if forced:
-      artist = unicode(artist, 'utf-8')
-
-    results = mb.findArtist(artist, limit=1)
-
-    if not results:
-      logger.info('No results found for: %s' % artist)
-      continue
-
-    try:
-      artistid = results[0]['id']
-
-    except IndexError:
-      logger.info('MusicBrainz query turned up no matches for: %s' % artist)
-      continue
+    mb_id = artistNameToMusicBrainzID(artist)
 
     # Add to database if it doesn't exist
-    if artistid != various_artists_mbid and not if_exists(artistid):
-      addArtisttoDB(artistid)
+    if mb_id != various_artists_mbid and not artistAlreadyTracked(mb_id):
+      addArtisttoDB(mb_id)
 
     # Just update the tracks if it does
-    else:
-      myDB = db.DBConnection()
-      havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
-      myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, artistid])
+    # else:
+    #   myDB = db.DBConnection()
+    #   havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE mb_id=?', [mb_id])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
+    #   myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, mb_id])
 
   # Update the similar artist tag cloud:
   logger.info('Updating artist information from Last.fm')
+
   try:
     lastfm.getSimilar()
   except Exception, e:
     logger.warn('Failed to update arist information from Last.fm: %s' % e)
 
-def addArtisttoDB(artistid, extrasonly=False):
+
+def artistNameToMusicBrainzID(artist_name):
+  artist_name = unicode(artist_name, 'utf-8')
+  artist = mb.findArtist(artist_name, limit=1)
+
+  if not artist:
+    logger.info('No results found for: %s' % artist_name)
+
+    return None
+  else:
+    return artist[0]['id']
+
+  # try:
+  #   music_brainz_id = artist[0]['id']
+  # except IndexError:
+  #   logger.info('MusicBrainz query turned up no matches for: %s' % artist_name)
+
+
+def addArtisttoDB(mb_id, extrasonly=False):
   # Can't add various artists - throws an error from MB
-  if artistid == various_artists_mbid:
+  if mb_id == various_artists_mbid:
     logger.warn('Cannot import Various Artists.')
     return
 
   myDB = db.DBConnection()
-  artist = mb.getArtist(artistid, extrasonly)
+  artist = mb.getArtist(mb_id, extrasonly)
 
   if not artist:
     return
@@ -73,7 +88,7 @@ def addArtisttoDB(artistid, extrasonly=False):
     sortname = artist['artist_name']
 
   logger.info(u"Now adding/updating: " + artist['artist_name'])
-  controlValueDict = {"ArtistID":   artistid}
+  controlValueDict = {"ArtistID":   mb_id}
   newValueDict = {
     "ArtistName":     artist['artist_name'],
     "ArtistSortName": sortname,
@@ -107,7 +122,7 @@ def addArtisttoDB(artistid, extrasonly=False):
       newValueDict = { "AlbumASIN": release_dict['asin'], "ReleaseDate": release_dict['releasedate'] }
 
     else:
-      newValueDict = {"ArtistID":     artistid,
+      newValueDict = {"ArtistID":     mb_id,
         "ArtistName":   artist['artist_name'],
         "AlbumTitle":   rg['title'],
         "AlbumASIN":    release_dict['asin'],
@@ -133,7 +148,7 @@ def addArtisttoDB(artistid, extrasonly=False):
       cleanname = helpers.cleanName(artist['artist_name'] + ' ' + rg['title'] + ' ' + track['title'])
 
       controlValueDict = {"TrackID": track['id'], "AlbumID": rg['id']}
-      newValueDict = {"ArtistID": artistid,
+      newValueDict = {"ArtistID": mb_id,
         "ArtistName":     artist['artist_name'],
         "AlbumTitle":     rg['title'],
         "AlbumASIN":      release_dict['asin'],
@@ -156,11 +171,11 @@ def addArtisttoDB(artistid, extrasonly=False):
 
       myDB.upsert("tracks", newValueDict, controlValueDict)
 
-  latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [artistid]).fetchone()
-  totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [artistid]))
-  havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [artistid])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
+  latestalbum = myDB.action('SELECT AlbumTitle, ReleaseDate, AlbumID from albums WHERE ArtistID=? order by ReleaseDate DESC', [mb_id]).fetchone()
+  totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=?', [mb_id]))
+  havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=? AND Location IS NOT NULL', [mb_id])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist['artist_name']]))
 
-  controlValueDict = {"ArtistID":   artistid}
+  controlValueDict = {"ArtistID":   mb_id}
 
   if latestalbum:
     newValueDict = {"Status":       "Active",
@@ -176,6 +191,7 @@ def addArtisttoDB(artistid, extrasonly=False):
 
   myDB.upsert("artists", newValueDict, controlValueDict)
   logger.info(u"Updating complete for: " + artist['artist_name'])
+
 
 def addReleaseById(rid):
   myDB = db.DBConnection()
@@ -287,3 +303,4 @@ def addReleaseById(rid):
     return
   else:
     logger.info('Release ' + str(rid) + " already exists in the database!")
+

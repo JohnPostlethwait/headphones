@@ -41,48 +41,47 @@
         <tbody>
         %for artist in artists:
           <%
-            totaltracks = artist['TotalTracks']
-            havetracks = artist['HaveTracks']
-
-            if not havetracks:
-              havetracks = 0
-            try:
-              percent = (havetracks*100.0)/totaltracks
-              if percent > 100:
-                percent = 100
-            except (ZeroDivisionError, TypeError):
-              percent = 0
-              totaltracks = '?'
-
-            if artist['Status'] == 'Paused':
-              grade = 'X'
-            elif artist['ReleaseDate'] and artist['ReleaseDate'] > helpers.today():
-              grade = 'A'
-            else:
-              grade = 'Z'
+            # totaltracks = artist['TotalTracks']
+            # havetracks = artist['HaveTracks']
+            # 
+            # if not havetracks:
+            #   havetracks = 0
+            # try:
+            #   percent = (havetracks*100.0)/totaltracks
+            #   if percent > 100:
+            #     percent = 100
+            # except (ZeroDivisionError, TypeError):
+            #   percent = 0
+            #   totaltracks = '?'
+            # 
+            # if artist['state'] == 'paused':
+            #   grade = 'X'
+            # elif artist['ReleaseDate'] and artist['ReleaseDate'] > helpers.today():
+            #   grade = 'A'
+            # else:
+            #   grade = 'Z'
           %>
-          <tr class="grade${grade}">
+          <tr class="gradeZ">
             <td id="select">
-              <input type="checkbox" name="${artist['ArtistID']}" class="checkbox" />
+              <input type="checkbox" name="${artist['id']}" class="checkbox" />
             </td>
             <td id="name">
-              <span title="${artist['ArtistSortName']}"></span>
-              <a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a>
+              <span title="${artist['clean_name']}"></span>
+              <a href="artist?id=${artist['id']}">${artist['name']}</a>
             </td>
             <td id="status">
-              ${artist['Status']}
+              ${artist['state']}
             </td>
             <td id="album">
-              <a title="${artist['LatestAlbum']}" href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum'] if artist['LatestAlbum'] else ''}</a>
+              <a title="" href="albumPage?AlbumID="></a>
             </td>
             <td>
-              ${artist['ReleaseDate'] if artist['ReleaseDate'] else ''}
             </td>
             <td id="have">
-              <span title="${percent}"></span>
+              <span title=""></span>
               <div class="progress-container">
-                <div style="width:${percent}%">
-                  <div class="havetracks">${havetracks}/${totaltracks}</div>
+                <div style="width:%;">
+                  <div class="havetracks"></div>
                 </div>
               </div>
             </td>
