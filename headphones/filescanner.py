@@ -55,7 +55,7 @@ def scan():
         logger.debug(u'Found the artist name "%s" in the ID3 tag of "%s" file.' % (id3_artist, unicode(full_path, errors="ignore")))
 
         # If we already have this artist in the DB, continue on, we don't need to scrape them again...
-        artist_currently_tracked = connection.action('SELECT id FROM artists WHERE clean_name=?', [helpers.cleanName(id3_artist)]).fetchone()
+        artist_currently_tracked = connection.action('SELECT artist_id FROM artists WHERE artist_clean_name=?', [helpers.cleanName(id3_artist)]).fetchone()
 
         if artist_currently_tracked:
           logger.debug(u'Artist name "%s" is already tracked by Headphones, moving on...' % id3_artist)
@@ -77,10 +77,10 @@ def scan():
             else:
               image_url = None
 
-            artist_record = connection.action('INSERT INTO artists (name, clean_name, image_url, location, state) VALUES(?, ?, ?, ?, ?)',
+            artist_record = connection.action('INSERT INTO artists (artist_name, artist_clean_name, artist_image_url, artist_location, artist_state) VALUES(?, ?, ?, ?, ?)',
                             [artist_info['name'], helpers.cleanName(artist_info['name']), image_url, full_path, 'wanted'])
 
-            getReleases( artist.releases, artist_record['id'] )
+            # getReleases( artist.releases, artist_record['id'] )
 
           except discogs.HTTPError:
             logger.info(u'No artist with the name "%s" could be found in the Discogs database, skipping...' % id3_artist)
@@ -88,7 +88,7 @@ def scan():
 
 
 
-def getReleases(releases, artist_id):
+# def getReleases(releases, artist_id):
   # DISCOGS ALBUM API SUCKS, DO THIS LATER.
   # 
   # for release in artist.releases:

@@ -478,13 +478,13 @@ def dbcheck():
     c = conn.cursor()
 
     # Artists Table
-    c.execute('CREATE TABLE IF NOT EXISTS artists (id INTEGER UNIQUE PRIMARY KEY NOT NULL, name TEXT NOT NULL, clean_name TEXT NOT NULL, location TEXT UNIQUE, image_url TEXT, state TEXT, added_on TEXT DEFAULT CURRENT_TIMESTAMP, updated_on TEXT DEFAULT CURRENT_TIMESTAMP)')
+    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_clean_name TEXT NOT NULL, artist_location TEXT UNIQUE, artist_image_url TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
     # Albums (Releases) Table
-    c.execute('CREATE TABLE IF NOT EXISTS albums (id INTEGER UNIQUE PRIMARY KEY NOT NULL, discogs_release_id TEXT, image_url TEXT, artist_id INTEGER NOT NULL, name TEXT, location TEXT UNIQUE, type TEXT, released_on TEXT, added_on TEXT DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(artist_id) REFERENCES artists(id))')
+    c.execute('CREATE TABLE IF NOT EXISTS albums (album_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_release_id TEXT, album_image_url TEXT, artist_id INTEGER NOT NULL, album_name TEXT, album_location TEXT UNIQUE, album_type TEXT, album_released_on TEXT, album_added_on TEXT DEFAULT CURRENT_TIMESTAMP, album_state TEXT, FOREIGN KEY(artist_id) REFERENCES artists(artist_id))')
     # Tracks Table
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_id INTEGER, track_number INTEGER, title TEXT, length TEXT, bitrate TEXT, location TEXT, added_on TEXT DEFAULT CURRENT_TIMESTAMP, updated_on TEXT DEFAULT CURRENT_TIMESTAMP, last_check_on TEXT, state TEXT, FOREIGN KEY(album_id) REFERENCES albums(id))')
+    c.execute('CREATE TABLE IF NOT EXISTS tracks (track_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_id INTEGER, track_number INTEGER, track_title TEXT, track_length TEXT, track_bitrate TEXT, track_location TEXT, track_added_on TEXT DEFAULT CURRENT_TIMESTAMP, track_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, track_last_check_on TEXT, track_state TEXT, FOREIGN KEY(album_id) REFERENCES albums(album_id))')
     # Snatched Tracking Table
-    c.execute('CREATE TABLE IF NOT EXISTS snatched (album_id INTEGER UNIQUE NOT NULL, FOREIGN KEY(album_id) REFERENCES albums(id))')
+    c.execute('CREATE TABLE IF NOT EXISTS snatched (album_id INTEGER UNIQUE NOT NULL, FOREIGN KEY(album_id) REFERENCES albums(album_id))')
     # Last.FM Suggestion Cloud
     c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
     # Index Creation

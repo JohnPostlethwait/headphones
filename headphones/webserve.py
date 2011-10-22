@@ -39,27 +39,27 @@ def serve_template(templatename, **kwargs):
 class WebInterface(object):
   @cherrypy.expose
   def index(self):
-    myDB = db.DBConnection()
-    artists = myDB.select('SELECT * from artists order by clean_name COLLATE NOCASE')
-    return serve_template(templatename="index.html", title="index", artists=artists)
+    connection = db.DBConnection()
+    artists = connection.select('SELECT artist_id, artist_name, artist_clean_name, artist_state FROM artists ORDER BY artist_clean_name COLLATE NOCASE')
+
+    return serve_template("index.html", title="index", artists=artists)
 
 
   @cherrypy.expose
   def artist(self, id):
-    myDB = db.DBConnection()
-    artist = myDB.action('SELECT * FROM artists WHERE id=?', [id]).fetchone()
-    albums = myDB.select('SELECT * from albums WHERE artist_id=? order by released_on DESC', [id])
+    artist = connection.action('SELECT * FROM artists WHERE id=?', [id]).fetchone()
+    albums = connection.select('SELECT * FROM albums WHERE artist_id=? ORDER BY released_on DESC', [id])
 
     return serve_template(templatename="artist.html", title=artist['name'], artist=artist, albums=albums)
 
 
   @cherrypy.expose
   def albumPage(self, id):
-    myDB = db.DBConnection()
-    album = myDB.action('SELECT * from albums WHERE id=?', [id]).fetchone()
-    tracks = myDB.select('SELECT * from tracks WHERE album_id=?', [id])
-    description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
+    album = connection.action('SELECT * FROM albums WHERE album_id=?', [id]).fetchone()
+    tracks = connection.select('SELECT * FROM tracks WHERE album_id=?', [id])
+    description = connection.action('SELECT * FROM descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
     title = album['ArtistName'] + ' - ' + album['AlbumTitle']
+
     return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
 
 
