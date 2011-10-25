@@ -5,22 +5,24 @@ import time
 
 from lib.beets.mediafile import MediaFile
 
-import lib.discogs as discogs
-
 import headphones
 
 from headphones import db
+from headphones import musicbrainz
 from headphones import logger
 from headphones import helpers
 
+import lib.musicbrainz2
+
+from lib.musicbrainz2 import utils
+
 connection = db.DBConnection()
-discogs.user_agent = 'Headphones/0.0.1 +https://github.com/JohnPostlethwait/headphones'
 
 
 
 
 # Stub method for updating the library.
-def updateArtists():
+def updateArtist():
   return None
 
 
@@ -30,6 +32,7 @@ def scan():
   for dirpath, dirnames, filenames in os.walk( headphones.MUSIC_DIR ):
     logger.debug(u'Now scanning the directory "%s"' % unicode(dirpath, errors="ignore"))
 
+    # Scan all of the files in this directory:
     for filename in filenames:
       # Only scan music files...
       if any( filename.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS ):
@@ -42,7 +45,7 @@ def scan():
           media_file = MediaFile( full_path )
         except Exception, e:
           logger.debug(u'Cannot read tags of file "%s" because of the exception "%s"' % (unicode(filename, errors="ignore"), str(e)))
-          continue
+          break
 
         # If we did read the tags, but the artist can't be found, move on to the next file...
         if media_file.albumartist:
@@ -50,60 +53,82 @@ def scan():
         elif media_file.artist:
           id3_artist = media_file.artist
         else:
-          continue
+          break
 
         logger.debug(u'Found the artist name "%s" in the ID3 tag of "%s" file.' % (id3_artist, unicode(full_path, errors="ignore")))
 
+        artist_path_parts = []
+
+        for part in dirpath.split('/'):
+          artist_path_parts.append( part )
+
+          if id3_artist.lower() in part.lower(): break
+
+        if artist_path_parts:
+          artist_path = os.sep.join( artist_path_parts )
+        else:
+          artist_path = headphones.MUSIC_DIR
+
         # If we already have this artist in the DB, continue on, we don't need to scrape them again...
-        artist_currently_tracked = connection.action('SELECT artist_id FROM artists WHERE artist_clean_name=?', [helpers.cleanName(id3_artist)]).fetchone()
+        artist_currently_tracked = connection.action('SELECT artist_id FROM artists WHERE artist_name = "' + id3_artist + '"').fetchone()
 
         if artist_currently_tracked:
           logger.debug(u'Artist name "%s" is already tracked by Headphones, moving on...' % id3_artist)
+
           break
         else:
-          # Scrape the Artist from Discogs Database, move on if we cannot...
-          try:
-            artist = discogs.Artist( id3_artist )
-            artist_info = artist.data
-            image_url = None
-            image_small_url = None
+          artist = musicbrainz.getBestArtistMatch( id3_artist )
+          artist_record = addArtist( id3_artist, artist, artist_path )
+          release_records = addReleases( artist, artist_record['artist_id'] )
 
-            # Loop through all of the artist images and select the "primary" one for storage in the DB.
-            if artist_info.get('images'):
-              for i in artist_info['images']:
-                if i['type'] != 'primary':
-                  image_url = i['uri']
-                  image_small_url = i['uri150']
-                  break
-
-            artist_record = connection.action('INSERT INTO artists (artist_name, artist_clean_name, artist_image_url, artist_small_image_url, artist_location, artist_state) VALUES(?, ?, ?, ?, ?, ?)',
-                            [artist_info['name'], helpers.cleanName(artist_info['name']), image_url, image_small_url, full_path, 'wanted'])
-
-            # getReleases( artist.releases, artist_record['id'] )
-
-          except discogs.HTTPError:
-            logger.info(u'No artist with the name "%s" could be found in the Discogs database, skipping...' % id3_artist)
-            break
+          break
 
 
+def addArtist( id3_name, musicbrainz_artist, path ):
+  connection.action('INSERT INTO artists (artist_name, artist_unique_name, \
+      artist_sort_name, artist_location, artist_state, artist_mb_id) VALUES(?, ?, ?, ?, ?, ?)',
+      [ id3_name, musicbrainz_artist.getUniqueName(),
+      musicbrainz_artist.getSortName(), path, 'wanted', utils.extractUuid(musicbrainz_artist.id)])
 
-# def getReleases(releases, artist_id):
-  # DISCOGS ALBUM API SUCKS, DO THIS LATER.
-  # 
-  # for release in artist.releases:
-  #   release_info = release.data.get('formats')
-  #   release_desc = release_info[0].get('descriptions')
-  # 
-  #   if release_info and release_desc:
-  #     is_album = False
-  # 
-  #     for release_type in release_desc:
-  #       # if release_type ==
-  # 
-  #       connection.action('INSERT INTO albums (discogs_release_id, image_url, artist_id, name, location, type, added_on) VALUES(?, ?, ?, ?, ?, ?, ?)',
-  #                   [])
-  #   else:
-  #     continue
+  artist_record = connection.action('SELECT * FROM artists WHERE artist_mb_id = ?', [utils.extractUuid(musicbrainz_artist.id)]).fetchone()
+
+  return artist_record
+
+
+def addReleases( musicbrainz_artist, artist_id ):
+  release_ids = []
+  releases_db_ids = []
+
+  for release in musicbrainz_artist.getReleases():
+    release_ids.append( utils.extractUuid( release.id ) )
+
+  # These release results do not contain all the information, we must re-query for that info...
+  for rid in release_ids:
+    release = musicbrainz.getRelease( rid )
+    release_group_id = utils.extractUuid(release.getReleaseGroup().id)
+    release_group_tracked = connection.action('SELECT * FROM albums WHERE album_release_group_id = ?', [release_group_id]).fetchone()
+
+    if release_group_tracked: continue
+
+    connection.action( 'INSERT INTO albums (album_mb_id, album_asin, album_release_group_id, \
+        artist_id, album_name, album_type, album_released_on, album_state) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
+        [ rid, release.getAsin(), release_group_id, artist_id, release.getTitle(), 
+        'album', release.getEarliestReleaseDate(), 'wanted' ] )
+
+    release_record = connection.action('SELECT * FROM albums WHERE album_mb_id = ?', [rid]).fetchone()
+
+    releases_db_ids.append( release_record['album_id'] )
+
+    track_number = 1
+
+    for track in release.getTracks():
+      track_record = connection.action('INSERT INTO tracks (album_id, track_number, \
+      track_title, track_length, track_state) VALUES(?, ?, ?, ?, ?)',
+      [ release_record['album_id'], track_number, track.getTitle(), track.getDuration(), 'wanted'])
+
+      track_number += 1
+
+  return releases_db_ids
 
 
 def updateMissingTrackPaths():
@@ -122,8 +147,9 @@ def updateMissingTrackPaths():
 
 
 def __ensureLibraryLocation__():
-  if not os.path.isdir(headphones.MUSIC_DIR):
+  if not os.path.isdir( headphones.MUSIC_DIR ):
     logger.warn('Cannot find the directory "%s" Not scanning.' % headphones.MUSIC_DIR)
+
     return False
   else:
     return True

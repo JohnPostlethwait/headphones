@@ -3,9 +3,11 @@ from __future__ import with_statement
 import time
 import threading
 
-import lib.musicbrainz2.webservice as ws
-import lib.musicbrainz2.model as m
-import lib.musicbrainz2.utils as u
+import lib.musicbrainz2 as musicbrainz2
+
+from lib.musicbrainz2 import webservice as ws
+from lib.musicbrainz2 import model as m
+from lib.musicbrainz2 import utils as u
 
 from lib.musicbrainz2.webservice import WebServiceError
 
@@ -37,34 +39,16 @@ def findArtist(name, limit=1):
 
     time.sleep(1)
 
-    if not artistResults:
-      return False
-
     for result in artistResults:
-      if result.artist.name != result.artist.getUniqueName() and limit == 1:
-        logger.debug('Found an artist with a disambiguation: %s - doing an album based search' % name)
-        artistdict = findArtistbyAlbum(name)
-
-        if not artistdict:
-          logger.debug('Cannot determine the best match from an artist/album search. Using top match instead')
-          artistlist.append({
-            'name':       result.artist.name,
-            'uniquename':   result.artist.getUniqueName(),
-            'id':       u.extractUuid(result.artist.id),
-            'url':        result.artist.id,
-            'score':      result.score
-            })
-        else:
-          artistlist.append(artistdict)
-
-      else:
-        artistlist.append({
-            'name':       result.artist.name,
-            'uniquename':   result.artist.getUniqueName(),
-            'id':       u.extractUuid(result.artist.id),
-            'url':        result.artist.id,
-            'score':      result.score
-            })
+      artistlist.append({
+        'name':       result.artist.name,
+        'uniquename': result.artist.getUniqueName(),
+        'sortname':   result.artist.getSortName(),
+        'id':         u.extractUuid(result.artist.id),
+        'url':        result.artist.id,
+        'score':      result.score,
+        'releases':   result.artist.getReleases()
+      })
 
     return artistlist
 
@@ -380,53 +364,8 @@ def getRelease(releaseid):
     release['tracks'] = tracks
     
     return release
-    
-def findArtistbyAlbum(name):
 
-  myDB = db.DBConnection()
-  
-  artist = myDB.action('SELECT AlbumTitle from have WHERE ArtistName=? AND AlbumTitle IS NOT NULL ORDER BY RANDOM()', [name]).fetchone()
-  
-  if not artist:
-    return False
-    
-  # Probably not neccessary but just want to double check
-  if not artist['AlbumTitle']:
-    return False
-  
-  term = '"'+artist['AlbumTitle']+'" AND artist:"'+name+'"'
-  
-  f = ws.ReleaseGroupFilter(query=term, limit=1)
-  results = None
-  attempt = 0
-      
-  while attempt < 5:
-      
-    try:
-      results = q.getReleaseGroups(f)
-      break
-    except WebServiceError, e:
-      logger.warn('Attempt to query MusicBrainz for %s failed: %s. Sleeping 5 seconds.' % (name, e))
-      attempt += 1
-      time.sleep(5) 
-  
-  time.sleep(1)
-  
-  if not results:
-    return False
 
-  artist_dict = {}
-  
-  for result in results:
-    releaseGroup = result.releaseGroup
-    artist_dict['name'] = releaseGroup.artist.name
-    artist_dict['uniquename'] = releaseGroup.artist.getUniqueName()
-    artist_dict['id'] = u.extractUuid(releaseGroup.artist.id)
-    artist_dict['url'] = releaseGroup.artist.id
-    artist_dict['score'] = result.score
-  
-  return artist_dict
-  
 def findAlbumID(artist=None, album=None):
 
   f = ws.ReleaseGroupFilter(title=album, artistName=artist, limit=1)

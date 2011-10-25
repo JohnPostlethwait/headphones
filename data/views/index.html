@@ -39,13 +39,12 @@
             <th id="status">Status</th>
           </tr>
         </thead>
+
         <tbody>
         %for artist in artists:
           <%
             if artist['artist_state'] == 'paused':
               row_grade = 'X'
-            # elif artist['ReleaseDate'] and artist['ReleaseDate'] > helpers.today():
-            #   grade = 'A'
             else:
               row_grade = 'Z'
           %>
