@@ -43,7 +43,7 @@ class WebInterface(object):
 
   @cherrypy.expose
   def index(self):
-    artists = self.database.select('SELECT artist_id, artist_name, artist_clean_name, artist_state FROM artists ORDER BY artist_clean_name COLLATE NOCASE')
+    artists = self.database.select('SELECT artist_id, artist_name, artist_unique_name, artist_state FROM artists ORDER BY artist_unique_name COLLATE NOCASE')
 
     return self.serve_template("index.html", title="index", artists=artists)
 

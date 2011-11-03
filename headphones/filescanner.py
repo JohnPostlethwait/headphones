@@ -3,6 +3,8 @@ import glob
 import datetime
 import time
 
+from multiprocessing.pool import ThreadPool
+
 from lib.beets.mediafile import MediaFile
 
 import headphones
@@ -12,18 +14,41 @@ from headphones import musicbrainz
 from headphones import logger
 from headphones import helpers
 
-import lib.musicbrainz2
-
 from lib.musicbrainz2 import utils
 
+
 connection = db.DBConnection()
+thread_pool = ThreadPool(4)
 
 
 
 
-# Stub method for updating the library.
-def updateArtist():
-  return None
+def updateArtist( artist_id ):
+  artist = connection.action('SELECT artist_location FROM artists WHERE artist_id = ?', [artist_id]).fetchone()
+
+  if artist:
+    for dirpath, dirnames, filenames in os.walk( artist['artist_location'] ):
+      logger.debug(u'Now scanning the directory "%s"' % dirpath)
+
+      # Scan all of the files in this directory:
+      for filename in filenames:
+        # Only scan music files...
+        if any( filename.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS ):
+          full_path = os.path.join( dirpath, filename )
+
+          # Try to read the tags from the file, move on if we can't.
+          try:
+            media_file = MediaFile( full_path )
+
+            connection.action("UPDATE tracks SET track_location=? WHERE album_id IN \
+                (SELECT album_id FROM albums WHERE album_name LIKE ? AND artist_id IN \
+                (SELECT artist_id FROM artists WHERE artist_id=?)) AND track_number=?",
+                (full_path, media_file.album, artist_id, media_file.track))
+          except Exception, e:
+            logger.debug(u'Cannot read tags of file "%s" because of the exception "%s"' % (filename, str(e)))
+            continue
+  else:
+    logger.info(u"Could not find an artist in the database with the artist_id of %s" % artist_id)
 
 
 def scan():
@@ -79,7 +104,10 @@ def scan():
         else:
           artist = musicbrainz.getBestArtistMatch( id3_artist )
           artist_record = addArtist( id3_artist, artist, artist_path )
-          release_records = addReleases( artist, artist_record['artist_id'] )
+
+          addReleases( artist, artist_record['artist_id'] )
+
+          thread_pool.map( updateArtist, artist_record['artist_id'] )
 
           break
 
