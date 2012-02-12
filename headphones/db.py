@@ -5,21 +5,25 @@ import os
 import sqlite3
 import threading
 import time
-
 import headphones
 
 from headphones import logger
 
 db_lock = threading.Lock()
 
+
+
 def dbFilename(filename="headphones.db"):
   return os.path.join(headphones.DATA_DIR, filename)
+
+
 
 class DBConnection:
   def __init__(self, filename="headphones.db"):
     self.filename = filename
     self.connection = sqlite3.connect(dbFilename(filename), 20)
     self.connection.row_factory = sqlite3.Row
+
 
   def action(self, query, args=None):
     with db_lock:
@@ -32,11 +36,10 @@ class DBConnection:
       while attempt < 5:
         try:
           if args == None:
-            #logger.debug(self.filename+": "+query)
             sqlResult = self.connection.execute(query)
           else:
-            #logger.debug(self.filename+": "+query+" with args "+str(args))
             sqlResult = self.connection.execute(query, args)
+
           self.connection.commit()
           break
         except sqlite3.OperationalError, e:
@@ -53,6 +56,7 @@ class DBConnection:
 
       return sqlResult
 
+
   def select(self, query, args=None):
     sqlResults = self.action(query, args).fetchall()
 
@@ -60,6 +64,7 @@ class DBConnection:
       return []
 
     return sqlResults
+
 
   def upsert(self, tableName, valueDict, keyDict):
     changesBefore = self.connection.total_changes

@@ -18,7 +18,7 @@
         <tr class="gradeZ">
           <td id="albumart"><img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.MZZZZZZZ.jpg" height="50" width="50"></td>
           <td id="artistname">${album['ArtistName']}</td>
-          <td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+          <td id="albumname"><a href="album?id=${album['album_id']}">${album['album_title']}</a></td>
           <td id="reldate">${album['ReleaseDate']}</td>
           <td id="type">${album['Type']}</td>
           <td id="status">${album['Status']}</td>
@@ -62,7 +62,7 @@
               <a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a>
             </td>
             <td id="albumname">
-              <a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a>
+              <a href="album?id=${album['album_id']}">${album['album_title']}</a>
             </td>
             <td id="reldate">${album['ReleaseDate']}</td>
             <td id="type">${album['Type']}</td>
