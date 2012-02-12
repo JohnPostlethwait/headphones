@@ -57,13 +57,12 @@ class WebInterface(object):
 
 
   @cherrypy.expose
-  def albumPage(self, id):
+  def album(self, id):
     album = self.database.action('SELECT * FROM albums WHERE album_id=?', [id]).fetchone()
     tracks = self.database.select('SELECT * FROM tracks WHERE album_id=?', [id])
-    description = self.database.action('SELECT * FROM descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
-    title = album['ArtistName'] + ' - ' + album['AlbumTitle']
+    # title = album['ArtistName'] + ' - ' + album['AlbumTitle']
 
-    return self.serve_template("album.html", title=title, album=album, tracks=tracks, description=description)
+    return self.serve_template("album.html", album=album, tracks=tracks)
 
 
   @cherrypy.expose

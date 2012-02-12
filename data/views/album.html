@@ -7,15 +7,15 @@
 <%def name="headerIncludes()">
   <div id="subhead_container">
     <ul id="subhead_menu">
-      <li><a href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Delete Album</a></li>
+      <li><a href="deleteAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}">Delete Album</a></li>
       %if album['Status'] == 'Skipped':
-      <li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Mark Album as Wanted</a></li>
+      <li><a href="queueAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}&new=False">Mark Album as Wanted</a></li>
       %elif album['Status'] == 'Wanted':
-      <li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Force Check</a></li>
-      <li><a href="unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}">Mark Album as Skipped</a></li>
+      <li><a href="queueAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}&new=True">Force Check</a></li>
+      <li><a href="unqueueAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}">Mark Album as Skipped</a></li>
       %else:
-      <li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False">Retry Download</a></li>
-      <li><a href="queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True">Try New Version</a></li>
+      <li><a href="queueAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}&new=False">Retry Download</a></li>
+      <li><a href="queueAlbum?album_id=${album['album_id']}&artist_id=${album['artist_id']}&new=True">Try New Version</a></li>
       %endif
     </ul>
   </div>
@@ -23,15 +23,15 @@
 
 <%def name="body()">
   <div class="table_wrapper">
-    <h2><a href="artistPage?ArtistID=${album['ArtistID']}"><- Back to ${album['ArtistName']}</a></h2>
+    <h2><a href="artist?artist_id=${album['artist_id']}"><- Back to ${album['ArtistName']}</a></h2>
     <div id="albumheader">  
       <img src="http://ec1.images-amazon.com/images/P/${album['AlbumASIN']}.01.LZZZZZZZ.jpg" height="200" width="200" alt="albumart" class="albumArt">
       <h1>${album['AlbumTitle']}</h1>
       <h2>${album['ArtistName']}</h2>
       <br>
       <%
-        totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
-        totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
+        totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE album_id=?", [album['album_id']]).fetchone()[0]
+        totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE album_id=?", [album['album_id']]))
         try:
           albumduration = helpers.convert_milliseconds(totalduration)
         except:
@@ -114,15 +114,15 @@
 <%def name="javascriptIncludes()">
   <script src="js/libs/jquery.dataTables.min.js"></script>
   <script>
-  $(document).ready(function()
-  {
-    $('#track_table').dataTable(
-      {
-        "aaSorting": [],
-        "bFilter": false,
-        "bInfo": false,
-        "bPaginate": false
-      });
-  });
+    $(document).ready(function()
+    {
+      $('#track_table').dataTable(
+        {
+          "aaSorting": [],
+          "bFilter": false,
+          "bInfo": false,
+          "bPaginate": false
+        });
+    });
   </script>
 </%def>

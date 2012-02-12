@@ -20,7 +20,7 @@
 <%def name="body()">
   <form action="markAlbums" method="get"><input type="hidden" name="ArtistID" value=${artist['artist_id']}>
     <div class="table_wrapper table_sorting">
-      <img class="left" height="50" src="${artist['artist_small_image_url']}" alt="${artist['artist_name']}" />
+      <img class="left" height="50" src="artist['artist_small_image_url']" alt="${artist['artist_name']}" />
       <h1 class="left">${artist['artist_name']}</h1>
 
       %if artist['artist_state'] == 'loading':
@@ -47,7 +47,6 @@
             <th id="type">Type</th>
             <th id="state">State</th>
             <th id="have">Have</th>
-            <th id="bitrate">Bitrate</th>
           </tr>
         </thead>
 
@@ -65,8 +64,7 @@
           %>
 
           <%
-            total_tracks = db.DBConnection().action('SELECT COUNT(*) AS count, AVG(track_bitrate) AS bitrate FROM tracks WHERE album_id=?', [album['album_id']]).fetchone()
-            bitrate = total_tracks['bitrate']
+            total_tracks = db.DBConnection().action('SELECT COUNT(*) as count FROM tracks WHERE album_id=?', [album['album_id']]).fetchone()
             total_tracks = total_tracks['count']
           %>
 
@@ -89,7 +87,7 @@
             </td>
 
             <td id="albumart">
-              <img src="${album['album_image_url']}" height="50" width="50">
+              <img src="album['album_image_url']" height="50" width="50">
             </td>
 
             <td id="albumname">
@@ -123,10 +121,6 @@
                 </div>
               </div>
             </td>
-
-            <td id="bitrate">
-              ${bitrate}
-            </td>
           </tr>
         %endfor
         </tbody>
@@ -153,8 +147,7 @@
             null,
             { "bSortable": false },
             null,
-            { "sType": "title-numeric"},
-            null
+            { "sType": "title-numeric"}
           ],
           "oLanguage": {
             "sLengthMenu":"Show _MENU_ albums per page",
