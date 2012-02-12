@@ -1,5 +1,6 @@
 <%inherit file="base.html"/>
 <%!
+  from headphones import db
   from headphones import helpers
 %>
 
@@ -32,59 +33,76 @@
               <input type="checkbox" onClick="toggle(this)" />
             </th>
             <th id="name">Artist Name</th>
-            <th id="status">Status</th>
             <th id="album">Latest Album</th>
-            <th style="min-width:120px;">Last Release</th>
+            <th style="min-width:120px;">Release Date</th>
             <th id="have">Tracks</th>
+            <th id="status">Status</th>
           </tr>
         </thead>
+
         <tbody>
         %for artist in artists:
           <%
-            totaltracks = artist['TotalTracks']
-            havetracks = artist['HaveTracks']
-
-            if not havetracks:
-              havetracks = 0
-            try:
-              percent = (havetracks*100.0)/totaltracks
-              if percent > 100:
-                percent = 100
-            except (ZeroDivisionError, TypeError):
-              percent = 0
-              totaltracks = '?'
-
-            if artist['Status'] == 'Paused':
-              grade = 'X'
-            elif artist['ReleaseDate'] and artist['ReleaseDate'] > helpers.today():
-              grade = 'A'
+            if artist['artist_state'] == 'paused':
+              row_grade = 'X'
             else:
-              grade = 'Z'
+              row_grade = 'Z'
           %>
-          <tr class="grade${grade}">
+          <tr class="grade${row_grade}">
             <td id="select">
-              <input type="checkbox" name="${artist['ArtistID']}" class="checkbox" />
+              <input type="checkbox" name="${artist['artist_id']}" class="checkbox" />
             </td>
+
             <td id="name">
-              <span title="${artist['ArtistSortName']}"></span>
-              <a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a>
+              <span title="${artist['artist_unique_name']}"></span>
+              <a href="artist?artist_id=${artist['artist_id']}">${artist['artist_name']}</a>
             </td>
-            <td id="status">
-              ${artist['Status']}
-            </td>
+
             <td id="album">
-              <a title="${artist['LatestAlbum']}" href="albumPage?AlbumID=${artist['AlbumID']}">${artist['LatestAlbum'] if artist['LatestAlbum'] else ''}</a>
+              <%
+                latest_album = db.DBConnection().action('SELECT album_id, album_name, MAX(album_released_on) AS album_released_on FROM albums WHERE artist_id = ?', [artist['artist_id']]).fetchone()
+              %>
+              % if latest_album['album_name']:
+                <a title="${latest_album['album_name']}" href="album?album_id=${latest_album['album_id']}">${latest_album['album_name']}</a>
+              % endif
             </td>
+
             <td>
-              ${artist['ReleaseDate'] if artist['ReleaseDate'] else ''}
+              % if latest_album['album_released_on']:
+                <p class="center">${latest_album['album_released_on']}</p>
+              % endif
             </td>
+
+            <%
+              total_tracks = db.DBConnection().action('SELECT COUNT(*) AS count FROM tracks WHERE album_id IN (SELECT album_id FROM albums WHERE artist_id=?)', [artist['artist_id']]).fetchone()
+              total_tracks = total_tracks['count']
+            %>
+
+            <%
+              obtained_tracks = db.DBConnection().action('SELECT COUNT(*) AS count FROM tracks WHERE album_id IN (SELECT album_id FROM albums WHERE artist_id=?) AND track_location IS NOT NULL', [artist['artist_id']]).fetchone()
+              obtained_tracks = obtained_tracks['count']
+            %>
+
+            <%
+              try:
+                percent = (obtained_tracks * 100.0) / total_tracks
+
+                if percent > 100: percent = 100
+              except (ZeroDivisionError, TypeError):
+                percent = 0
+            %>
+
             <td id="have">
               <span title="${percent}"></span>
               <div class="progress-container">
-                <div style="width:${percent}%">
-                  <div class="havetracks">${havetracks}/${totaltracks}</div>
+                <div style="width: ${percent}%;">
+                  <div class="havetracks">${obtained_tracks}/${total_tracks}</div>
                 </div>
               </div>
+            </td>
+
+            <td id="status">
+              ${artist['artist_state']}
             </td>
           </tr>
         %endfor

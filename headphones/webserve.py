@@ -10,121 +10,149 @@ import threading
 
 import headphones
 
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync
-from headphones.helpers import checked, radio
+from headphones import logger
+from headphones import searcher
+from headphones import db
+from headphones import librarysync
+from headphones import importer
+from headphones import mb
+from headphones import lastfm
 
+from headphones.helpers import checked
+from headphones.helpers import radio
 
-
-def serve_template(templatename, **kwargs):
-  template_dir = os.path.join(str(headphones.PROG_DIR), 'data/views/')
-
-  _hplookup = TemplateLookup(directories=[template_dir])
-
-  try:
-    template = _hplookup.get_template(templatename)
-    return template.render(**kwargs)
-  except:
-    return exceptions.html_error_template().render()
 
 
 
 class WebInterface(object):
+  @property
+  def database(self):
+    return db.DBConnection()
+
+
+  @staticmethod
+  def serve_template(name, **kwargs):
+    template_dir = os.path.join(str(headphones.PROG_DIR), 'data/views/')
+    lookup = TemplateLookup(directories=[template_dir])
+
+    try:
+      return lookup.get_template(name).render(**kwargs)
+    except:
+      return exceptions.html_error_template().render()
+
+
   @cherrypy.expose
   def index(self):
-    myDB = db.DBConnection()
-    artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
-    return serve_template(templatename="index.html", title="index", artists=artists)
+    artists = self.database.select('SELECT artist_id, artist_name, artist_unique_name, artist_state FROM artists ORDER BY artist_unique_name COLLATE NOCASE')
+
+    return self.serve_template("index.html", title="index", artists=artists)
+
 
   @cherrypy.expose
-  def artistPage(self, ArtistID):
-    myDB = db.DBConnection()
-    artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
-    albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC', [ArtistID])
-    return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist, albums=albums)
+  def artist(self, artist_id):
+    artist = self.database.action('SELECT * FROM artists WHERE artist_id=?', [artist_id]).fetchone()
+    albums = self.database.select('SELECT * FROM albums WHERE artist_id=? ORDER BY album_released_on DESC', [artist_id])
+
+    return self.serve_template("artist.html", title=artist['artist_name'], artist=artist, albums=albums)
+
 
   @cherrypy.expose
-  def albumPage(self, AlbumID):
-    myDB = db.DBConnection()
-    album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
-    tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [AlbumID])
-    description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
+  def albumPage(self, id):
+    album = self.database.action('SELECT * FROM albums WHERE album_id=?', [id]).fetchone()
+    tracks = self.database.select('SELECT * FROM tracks WHERE album_id=?', [id])
+    description = self.database.action('SELECT * FROM descriptions WHERE ReleaseGroupID=?', [AlbumID]).fetchone()
     title = album['ArtistName'] + ' - ' + album['AlbumTitle']
-    return serve_template(templatename="album.html", title=title, album=album, tracks=tracks, description=description)
+
+    return self.serve_template("album.html", title=title, album=album, tracks=tracks, description=description)
+
 
   @cherrypy.expose
   def search(self, name, type):
     if len(name) == 0:
       raise cherrypy.HTTPRedirect("index")
+
     if type == 'artist':
       searchresults = mb.findArtist(name, limit=100)
     else:
       searchresults = mb.findRelease(name, limit=100)
-    return serve_template(templatename="searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, type=type)
+
+    return self.serve_template("searchresults.html", title='Search Results for: "' + name + '"', searchresults=searchresults, type=type)
+
 
   @cherrypy.expose
   def addArtist(self, artistid):
     threading.Thread(target=importer.addArtisttoDB, args=[artistid]).start()
     time.sleep(5)
     threading.Thread(target=lastfm.getSimilar).start()
+
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % artistid)
+
 
   @cherrypy.expose
   def getExtras(self, ArtistID):
-    myDB = db.DBConnection()
     controlValueDict = {'ArtistID': ArtistID}
     newValueDict = {'IncludeExtras': 1}
-    myDB.upsert("artists", newValueDict, controlValueDict)
+    self.database.upsert("artists", newValueDict, controlValueDict)
     threading.Thread(target=importer.addArtisttoDB, args=[ArtistID, True]).start()
     time.sleep(10)
+
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+
 
   @cherrypy.expose
   def removeExtras(self, ArtistID):
-    myDB = db.DBConnection()
     controlValueDict = {'ArtistID': ArtistID}
     newValueDict = {'IncludeExtras': 0}
-    myDB.upsert("artists", newValueDict, controlValueDict)
-    extraalbums = myDB.select('SELECT AlbumID from albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"', [ArtistID])
+    self.database.upsert("artists", newValueDict, controlValueDict)
+    extraalbums = self.database.select('SELECT AlbumID FROM albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"', [ArtistID])
+
     for album in extraalbums:
-      myDB.action('DELETE from tracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
-      myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+      self.database.action('DELETE from tracks WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+      self.database.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?', [ArtistID, album['AlbumID']])
+
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+
 
   @cherrypy.expose
   def pauseArtist(self, ArtistID):
     logger.info(u"Pausing artist: " + ArtistID)
-    myDB = db.DBConnection()
     controlValueDict = {'ArtistID': ArtistID}
     newValueDict = {'Status': 'Paused'}
-    myDB.upsert("artists", newValueDict, controlValueDict)
+    self.database.upsert("artists", newValueDict, controlValueDict)
+
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+
 
   @cherrypy.expose
   def resumeArtist(self, ArtistID):
     logger.info(u"Resuming artist: " + ArtistID)
-    myDB = db.DBConnection()
     controlValueDict = {'ArtistID': ArtistID}
     newValueDict = {'Status': 'Active'}
-    myDB.upsert("artists", newValueDict, controlValueDict)
+    self.database.upsert("artists", newValueDict, controlValueDict)
+
     raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
+
   @cherrypy.expose
-  def deleteArtist(self, ArtistID):
+  def deleteArtist(self, id):
     logger.info(u"Deleting all traces of artist: " + ArtistID)
-    myDB = db.DBConnection()
-    myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
-    myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
-    myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+
+    self.database.action('DELETE FROM artists WHERE id=?', [id])
+    self.database.action('DELETE FROM albums WHERE artist_id=?', [id])
+    self.database.action('DELETE FROM tracks WHERE ArtistID=?', [ArtistID]) # TODO: JOIN DELETE
+
     raise cherrypy.HTTPRedirect("index")
 
+
   @cherrypy.expose
-  def refreshArtist(self, ArtistID):
-    importer.addArtisttoDB(ArtistID)
-    raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+  def refreshArtist(self, id):
+    importer.addArtisttoDB(id)
+
+    raise cherrypy.HTTPRedirect("artist?id=%s" % id)
+
 
   @cherrypy.expose
   def markAlbums(self, ArtistID=None, action=None, **args):
-    myDB = db.DBConnection()
     if action == 'WantedNew':
       newaction = 'Wanted'
     else:
@@ -132,7 +160,8 @@ class WebInterface(object):
     for mbid in args:
       controlValueDict = {'AlbumID': mbid}
       newValueDict = {'Status': newaction}
-      myDB.upsert("albums", newValueDict, controlValueDict)
+      self.database.upsert("albums", newValueDict, controlValueDict)
+
       if action == 'Wanted':
         searcher.searchNZB(mbid, new=False)
       if action == 'WantedNew':
@@ -142,77 +171,87 @@ class WebInterface(object):
     else:
       raise cherrypy.HTTPRedirect("upcoming")
 
+
   @cherrypy.expose
   def addArtists(self, **args):
-    threading.Thread(target=importer.artistlist_to_mbids, args=[args, True]).start()
+    threading.Thread(target=importer.artistNamesToMusicBrainzIds, args=[args]).start()
     time.sleep(5)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None):
     logger.info(u"Marking album: " + AlbumID + "as wanted...")
-    myDB = db.DBConnection()
     controlValueDict = {'AlbumID': AlbumID}
     newValueDict = {'Status': 'Wanted'}
-    myDB.upsert("albums", newValueDict, controlValueDict)
+    self.database.upsert("albums", newValueDict, controlValueDict)
     searcher.searchNZB(AlbumID, new)
+
     if ArtistID:
       raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     else:
       raise cherrypy.HTTPRedirect(redirect)
 
+
   @cherrypy.expose
   def unqueueAlbum(self, AlbumID, ArtistID):
     logger.info(u"Marking album: " + AlbumID + "as skipped...")
-    myDB = db.DBConnection()
     controlValueDict = {'AlbumID': AlbumID}
     newValueDict = {'Status': 'Skipped'}
-    myDB.upsert("albums", newValueDict, controlValueDict)
-    raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
+    self.database.upsert("albums", newValueDict, controlValueDict)
+
+    raise cherrypy.HTTPRedirect("artist?id=%s" % ArtistID)
+
 
   @cherrypy.expose
   def deleteAlbum(self, AlbumID, ArtistID=None):
     logger.info(u"Deleting all traces of album: " + AlbumID)
-    myDB = db.DBConnection()
-    myDB.action('DELETE from albums WHERE AlbumID=?', [AlbumID])
-    myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
+
+    self.database.action('DELETE FROM albums WHERE AlbumID=?', [AlbumID])
+    self.database.action('DELETE FROM tracks WHERE AlbumID=?', [AlbumID])
+
     if ArtistID:
       raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
     else:
       raise cherrypy.HTTPRedirect("index")
 
+
   @cherrypy.expose
   def upcoming(self):
-    myDB = db.DBConnection()
-    upcoming = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
-    wanted = myDB.select("SELECT * from albums WHERE Status='Wanted'")
-    return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
+    upcoming = self.database.select("SELECT * FROM albums WHERE released_on > date('now') ORDER BY released_on DESC")
+    wanted = self.database.select("SELECT * FROM albums WHERE state='Wanted'")
+
+    return self.serve_template("upcoming.html", title="Upcoming", upcoming=upcoming, wanted=wanted)
+
 
   @cherrypy.expose
   def manageNew(self):
-    return serve_template(templatename="managenew.html", title="Manage New Artists")
+    return self.serve_template("managenew.html", title="Manage New Artists")
+
 
   @cherrypy.expose
   def markArtists(self, action=None, **args):
-    myDB = db.DBConnection()
     for ArtistID in args:
       if action == 'delete':
-        myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
-        myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
-        myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+        self.database.action('DELETE FROM artists WHERE ArtistID=?', [ArtistID])
+        self.database.action('DELETE FROM albums WHERE ArtistID=?', [ArtistID])
+        self.database.action('DELETE FROM tracks WHERE ArtistID=?', [ArtistID])
       elif action == 'pause':
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'Status': 'Paused'}
-        myDB.upsert("artists", newValueDict, controlValueDict)
+        self.database.upsert("artists", newValueDict, controlValueDict)
       elif action == 'resume':
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'Status': 'Active'}
-        myDB.upsert("artists", newValueDict, controlValueDict)
+        self.database.upsert("artists", newValueDict, controlValueDict)
       else:
         # These may and probably will collide - need to make a better way to queue musicbrainz queries
         threading.Thread(target=importer.addArtisttoDB, args=[ArtistID]).start()
         time.sleep(30)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def importLastFM(self, username):
@@ -220,7 +259,9 @@ class WebInterface(object):
     headphones.config_write()
     threading.Thread(target=lastfm.getArtists).start()
     time.sleep(10)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def importItunes(self, path):
@@ -228,69 +269,90 @@ class WebInterface(object):
     headphones.config_write()
     threading.Thread(target=importer.itunesImport, args=[path]).start()
     time.sleep(10)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def musicScan(self, path, redirect=None):
     headphones.MUSIC_DIR = path
     headphones.config_write()
+
     try:
-      threading.Thread(target=librarysync.libraryScan).start()
+      threading.Thread(target=librarysync.scan).start()
     except Exception, e:
       logger.error('Unable to complete the scan: %s' % e)
+
     time.sleep(10)
+
     if redirect:
       raise cherrypy.HTTPRedirect(redirect)
     else:
       raise cherrypy.HTTPRedirect("index")
 
+
   @cherrypy.expose
   def forceUpdate(self):
     from headphones import updater
+
     threading.Thread(target=updater.dbUpdate).start()
     time.sleep(5)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def forceSearch(self):
     from headphones import searcher
+
     threading.Thread(target=searcher.searchNZB).start()
     time.sleep(5)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def forcePostProcess(self):
     from headphones import postprocessor
+
     threading.Thread(target=postprocessor.forcePostProcess).start()
     time.sleep(5)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def checkGithub(self):
     from headphones import versioncheck
+
     versioncheck.checkGithub()
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def history(self):
-    myDB = db.DBConnection()
-    history = myDB.select('''SELECT * from snatched order by DateAdded DESC''')
-    return serve_template(templatename="history.html", title="History", history=history)
+    history = self.database.select('SELECT * FROM snatched ORDER BY DateAdded DESC')
+
+    return self.serve_template("history.html", title="History", history=history)
+
 
   @cherrypy.expose
   def logs(self):
-    return serve_template(templatename="logs.html", title="Log", lineList=headphones.LOG_LIST)
+    return self.serve_template("logs.html", title="Log", lineList=headphones.LOG_LIST)
+
 
   @cherrypy.expose
   def clearhistory(self, type=None):
-    myDB = db.DBConnection()
     if type == 'all':
       logger.info(u"Clearing all history")
-      myDB.action('DELETE from snatched')
+      self.database.action('DELETE FROM snatched')
     else:
       logger.info(u"Clearing history where status is %s" % type)
-      myDB.action('DELETE from snatched WHERE Status=?', [type])
+      self.database.action('DELETE FROM snatched WHERE Status=?', [type])
+
     raise cherrypy.HTTPRedirect("history")
+
 
   @cherrypy.expose
   def config(self):
@@ -350,7 +412,9 @@ class WebInterface(object):
           "encoderquality": headphones.ENCODERQUALITY,
           "encoderlossless": checked(headphones.ENCODERLOSSLESS)
         }
-    return serve_template(templatename="config.html", title="Settings", config=config)
+
+    return self.serve_template("config.html", title="Settings", config=config)
+
 
   @cherrypy.expose
   def configUpdate(self, http_host='0.0.0.0', http_username=None, http_port=8181, http_password=None, launch_browser=0,
@@ -416,37 +480,49 @@ class WebInterface(object):
 
     raise cherrypy.HTTPRedirect("config")
 
+
   @cherrypy.expose
   def shutdown(self):
     headphones.SIGNAL = 'shutdown'
     message = 'Shutting Down...'
-    return serve_template(templatename="shutdown.html", title="Shutting Down", message=message, timer=15)
+
+    return self.serve_template("shutdown.html", title="Shutting Down", message=message, timer=15)
+
 
   @cherrypy.expose
   def restart(self):
     headphones.SIGNAL = 'restart'
     message = 'Restarting in 30 Seconds&hellip;'
-    return serve_template(templatename="shutdown.html", title="Restarting", message=message, timer=30)
+
+    return self.serve_template("shutdown.html", title="Restarting", message=message, timer=30)
+
 
   @cherrypy.expose
   def update(self):
     headphones.SIGNAL = 'update'
     message = 'Updating&hellip;'
-    return serve_template(templatename="shutdown.html", title="Updating", message=message, timer=120)
+
+    return self.serve_template("shutdown.html", title="Updating", message=message, timer=120)
+
 
   @cherrypy.expose
   def suggestions(self):
-    myDB = db.DBConnection()
-    cloudlist = myDB.select('SELECT * from lastfmcloud')
-    return serve_template(templatename="suggestions.html", title="Extras", cloudlist=cloudlist)
+    cloudlist = self.database.select('SELECT * FROM lastfmcloud')
+
+    return self.serve_template("suggestions.html", title="Extras", cloudlist=cloudlist)
+
 
   @cherrypy.expose
   def addReleaseById(self, rid):
     threading.Thread(target=importer.addReleaseById, args=[rid]).start()
     time.sleep(5)
+
     raise cherrypy.HTTPRedirect("index")
+
 
   @cherrypy.expose
   def updateCloud(self):
     lastfm.getSimilar()
+
     raise cherrypy.HTTPRedirect("extras")
+

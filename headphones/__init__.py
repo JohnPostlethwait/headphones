@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-import os, sys, subprocess
+import os, sys, subprocess, signal
 
 import threading
 import webbrowser
@@ -13,6 +13,7 @@ import cherrypy
 
 from headphones import updater, searcher, importer, versioncheck, logger, postprocessor, version, sab, librarysync
 from headphones.common import *
+
 
 FULL_PATH = None
 PROG_DIR = None
@@ -32,7 +33,7 @@ INIT_LOCK = threading.Lock()
 __INITIALIZED__ = False
 started = False
 
-DATA_DIR = None
+DATA_DIR = '.'
 
 CONFIG_FILE = None
 CFG = None
@@ -169,7 +170,6 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     
 
 def initialize():
-
     with INIT_LOCK:
         global __INITIALIZED__, FULL_PATH, PROG_DIR, VERBOSE, DAEMON, DATA_DIR, CONFIG_FILE, CFG, LOG_DIR, CACHE_DIR, \
                 HTTP_PORT, HTTP_HOST, HTTP_USERNAME, HTTP_PASSWORD, HTTP_ROOT, LAUNCH_BROWSER, GIT_PATH, \
@@ -273,23 +273,23 @@ def initialize():
 
         if not LOG_DIR:
             LOG_DIR = os.path.join(DATA_DIR, 'logs')
-        
+
         if not os.path.exists(LOG_DIR):
             try:
                 os.makedirs(LOG_DIR)
             except OSError:
                 if VERBOSE:
                     print 'Unable to create the log directory. Logging to screen only.'
-        
+
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
-        
+
         # Update some old config code:
         if FOLDER_FORMAT == '%artist/%album/%track':
             FOLDER_FORMAT = 'artist/album [year]'
         if FILE_FORMAT == '%tracknumber %artist - %album - %title':
             FILE_FORMAT = 'tracknumber artist - album - title'
-        
+
         # Put the cache dir in the data dir for now
         CACHE_DIR = os.path.join(DATA_DIR, 'cache')
         if not os.path.exists(CACHE_DIR):
@@ -317,16 +317,15 @@ def initialize():
 
         __INITIALIZED__ = True
         return True
-    
-def daemonize():
 
+def daemonize():
     if threading.activeCount() != 1:
         logger.warn('There are %r active threads. Daemonizing may cause \
                         strange behavior.' % threading.enumerate())
-    
+
     sys.stdout.flush()
     sys.stderr.flush()
-    
+
     # Do first fork
     try:
         pid = os.fork()
@@ -338,7 +337,7 @@ def daemonize():
             os._exit(0)
     except OSError, e:
         sys.exit("1st fork failed: %s [%d]" % (e.strerror, e.errno))
-        
+
     os.setsid()
 
     # Do second fork
@@ -352,11 +351,11 @@ def daemonize():
 
     os.chdir("/")
     os.umask(0)
-    
+
     si = open('/dev/null', "r")
     so = open('/dev/null', "a+")
     se = open('/dev/null', "a+")
-    
+
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())
@@ -368,17 +367,15 @@ def daemonize():
         file(PIDFILE, 'w').write("%s\n" % pid)
 
 def launch_browser(host, port, root):
-
     if host == '0.0.0.0':
         host = 'localhost'
-    
-    try:    
+
+    try:
         webbrowser.open('http://%s:%i%s' % (host, port, root))
     except Exception, e:
         logger.error('Could not launch browser: %s' % e)
 
 def config_write():
-
     new_config = ConfigObj()
     new_config.filename = CONFIG_FILE
 
@@ -411,7 +408,7 @@ def config_write():
     new_config['General']['blackhole_dir'] = BLACKHOLE_DIR
     new_config['General']['usenet_retention'] = USENET_RETENTION
     new_config['General']['include_extras'] = int(INCLUDE_EXTRAS)
-    
+
     new_config['General']['nzb_search_interval'] = NZB_SEARCH_INTERVAL
     new_config['General']['libraryscan_interval'] = LIBRARYSCAN_INTERVAL
     new_config['General']['download_scan_interval'] = DOWNLOAD_SCAN_INTERVAL
@@ -459,140 +456,83 @@ def config_write():
 
     new_config.write()
 
-    
+
 def start():
-    
     global __INITIALIZED__, started
-    
+
     if __INITIALIZED__:
-    
-        # Start our scheduled background tasks
+      # Start our scheduled background tasks
 
-        SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
-        SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
-        SCHED.add_interval_job(librarysync.libraryScan, minutes=LIBRARYSCAN_INTERVAL)
-        SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
-        SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
+      SCHED.add_cron_job(updater.dbUpdate, hour=4, minute=0, second=0)
+      SCHED.add_interval_job(searcher.searchNZB, minutes=NZB_SEARCH_INTERVAL)
+      # SCHED.add_interval_job(librarysync.scan, minutes=LIBRARYSCAN_INTERVAL)
+      SCHED.add_interval_job(versioncheck.checkGithub, minutes=300)
+      SCHED.add_interval_job(postprocessor.checkFolder, minutes=DOWNLOAD_SCAN_INTERVAL)
 
-        SCHED.start()
-        
-        started = True
-    
+      SCHED.start()
+
+      started = True
+
 def dbcheck():
-    conn=sqlite3.connect(DB_FILE)
-    c=conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS artists (ArtistID TEXT UNIQUE, ArtistName TEXT, ArtistSortName TEXT, DateAdded TEXT, Status TEXT, IncludeExtras INTEGER, LatestAlbum TEXT, ReleaseDate TEXT, AlbumID TEXT, HaveTracks INTEGER, TotalTracks INTEGER)')
-    c.execute('CREATE TABLE IF NOT EXISTS albums (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, ReleaseDate TEXT, DateAdded TEXT, AlbumID TEXT UNIQUE, Status TEXT, Type TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS have (ArtistName TEXT, AlbumTitle TEXT, TrackNumber TEXT, TrackTitle TEXT, TrackLength TEXT, BitRate TEXT, Genre TEXT, Date TEXT, TrackID TEXT, Location TEXT, CleanName TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
-    c.execute('CREATE TABLE IF NOT EXISTS descriptions (ReleaseGroupID TEXT, ReleaseID TEXT, Summary TEXT, Content TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS releases (ReleaseID TEXT, ReleaseGroupID TEXT, UNIQUE(ReleaseID, ReleaseGroupID))')
-    c.execute('CREATE INDEX IF NOT EXISTS tracks_albumid ON tracks(AlbumID ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS album_artistid_reldate ON albums(ArtistID ASC, ReleaseDate DESC)')
-    
-    try:
-        c.execute('SELECT IncludeExtras from artists')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
-        
-    try:
-        c.execute('SELECT LatestAlbum from artists')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN LatestAlbum TEXT')
-        
-    try:
-        c.execute('SELECT ReleaseDate from artists')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN ReleaseDate TEXT')
-        
-    try:
-        c.execute('SELECT AlbumID from artists')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN AlbumID TEXT')
-        
-    try:
-        c.execute('SELECT HaveTracks from artists')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
-        
-    try:
-        c.execute('SELECT TotalTracks from artists')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
-        
-    try:
-        c.execute('SELECT Type from albums')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE albums ADD COLUMN Type TEXT DEFAULT "Album"')
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
 
-    try:
-        c.execute('SELECT TrackNumber from tracks')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE tracks ADD COLUMN TrackNumber INTEGER')
-        
-    try:
-        c.execute('SELECT FolderName from snatched')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')
-    
-    try:
-        c.execute('SELECT Location from tracks')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE tracks ADD COLUMN Location TEXT')
-        
-    try:
-        c.execute('SELECT Location from have')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE have ADD COLUMN Location TEXT')
-    
-    try:
-        c.execute('SELECT BitRate from tracks')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE tracks ADD COLUMN BitRate INTEGER')  
-        
-    try:
-        c.execute('SELECT CleanName from tracks')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE tracks ADD COLUMN CleanName TEXT')  
-        
-    try:
-        c.execute('SELECT CleanName from have')
-    except sqlite3.OperationalError:
-        c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')  
-    
+    # Artists Table
+    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_unique_name TEXT NOT NULL, artist_sort_name TEXT, artist_mb_id TEXT UNIQUE NOT NULL, artist_location TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
+    # Albums (Releases) Table
+    c.execute('CREATE TABLE IF NOT EXISTS albums (album_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_mb_id TEXT UNIQUE NOT NULL, album_release_group_id TEXT, album_asin TEXT, artist_id INTEGER NOT NULL, album_name TEXT, album_location TEXT, album_type TEXT, album_released_on TEXT, album_added_on TEXT DEFAULT CURRENT_TIMESTAMP, album_state TEXT, FOREIGN KEY(artist_id) REFERENCES artists(artist_id))')
+    # Tracks Table
+    c.execute('CREATE TABLE IF NOT EXISTS tracks (track_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_id INTEGER, track_number INTEGER, track_title TEXT, track_length TEXT, track_location TEXT UNIQUE, track_added_on TEXT DEFAULT CURRENT_TIMESTAMP, track_state TEXT, FOREIGN KEY(album_id) REFERENCES albums(album_id))')
+    # Snatched Tracking Table
+    c.execute('CREATE TABLE IF NOT EXISTS snatched (album_id INTEGER UNIQUE NOT NULL, FOREIGN KEY(album_id) REFERENCES albums(album_id))')
+    # Last.FM Suggestion Cloud
+    c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
+    # Index Creation
+    c.execute('CREATE INDEX IF NOT EXISTS albums_artist_ids ON albums(artist_id ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS tracks_album_ids ON tracks(album_id ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS snatched_track_ids ON snatched(track_id ASC)')
+
     conn.commit()
     c.close()
 
-    
-def shutdown(restart=False, update=False):
 
+def shutdown(restart=False, update=False):
     cherrypy.engine.exit()
     SCHED.shutdown(wait=False)
-    
-    config_write()
-    
-    if not restart and not update:
-    	logger.info('Headphones is shutting down...')
-    if update:
-    	logger.info('Headphones is updating...')
-        try:
-            versioncheck.update()
-        except Exception, e:
-            logger.warn('Headphones failed to update: %s. Restarting.' % e) 
 
-    if PIDFILE :
+    config_write()
+
+    if not restart and not update:
+      logger.info('Headphones is shutting down...')
+    if update:
+      logger.info('Headphones is updating...')
+
+      try:
+          versioncheck.update()
+      except Exception, e:
+          logger.warn('Headphones failed to update: %s. Restarting.' % e) 
+
+    if PIDFILE:
         logger.info ('Removing pidfile %s' % PIDFILE)
         os.remove(PIDFILE)
-        
+
     if restart:
-    	logger.info('Headphones is restarting...')
-        popen_list = [sys.executable, FULL_PATH]
-        popen_list += ARGS
-        if '--nolaunch' not in popen_list:
-            popen_list += ['--nolaunch']
-        logger.info('Restarting Headphones with ' + str(popen_list))
-        subprocess.Popen(popen_list, cwd=os.getcwd())
-        
+      logger.info('Headphones is restarting...')
+
+      popen_list = [sys.executable, FULL_PATH]
+      popen_list += ARGS
+
+      if '--nolaunch' not in popen_list:
+          popen_list += ['--nolaunch']
+
+      logger.info('Restarting Headphones with ' + str(popen_list))
+      subprocess.Popen(popen_list, cwd=os.getcwd())
+
     os._exit(0)
+
+
+def signal_handler(signal, frame):
+  logger.info('Headphones is shutting down...')
+  sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
