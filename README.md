@@ -11,19 +11,8 @@ For additional startup options, type 'python Headphones.py -h' or 'python Headph
 ###Screenshots
 First Run
 
-![preview thumb](http://img806.imageshack.us/img806/4202/headphones2.png)
+![preview thumb](http://img502.imageshack.us/img502/7814/screenshot20111102at115a.png)
 
-Artist Search Results
-
-![preview thumb](http://img12.imageshack.us/img12/7838/headphones4.png)
-
-Album Selection
-
-![preview thumb](http://img836.imageshack.us/img836/2880/headphones3.png)
-
-iTunes/Import
-
-![preview thumb](http://img62.imageshack.us/img62/1218/headphones1.png)
 
 There are still a few things that I'm working on:
 
