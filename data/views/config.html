@@ -51,7 +51,7 @@
     <form action="importLastFM" method="get">
       <label for="username">Last.FM Username</label>
       %if headphones.LASTFM_USERNAME:
-      <input type="text" id="username" value="${lastfmvalue}" name="username" />
+      <input type="text" id="username" value="${headphones.LASTFM_USERNAME}" name="username" />
       %else:
       <input type="text" id="username" name="username" />
       %endif
