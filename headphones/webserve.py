@@ -22,8 +22,6 @@ from headphones.helpers import checked
 from headphones.helpers import radio
 
 
-
-
 class WebInterface(object):
   @property
   def database(self):
@@ -60,9 +58,9 @@ class WebInterface(object):
   def album(self, id):
     album = self.database.action('SELECT * FROM albums WHERE album_id=?', [id]).fetchone()
     tracks = self.database.select('SELECT * FROM tracks WHERE album_id=?', [id])
-    # title = album['ArtistName'] + ' - ' + album['AlbumTitle']
+    title = '' #album['ArtistName'] + ' - ' + album['AlbumTitle']
 
-    return self.serve_template("album.html", album=album, tracks=tracks)
+    return self.serve_template("album.html", album=album, tracks=tracks, title=title)
 
 
   @cherrypy.expose

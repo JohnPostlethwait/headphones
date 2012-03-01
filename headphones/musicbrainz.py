@@ -49,6 +49,7 @@ def getBestArtistMatch(artist_name):
 
 def getRelease( release_id ):
   attempt = 0
+  release = None
   includes = webservice.ReleaseIncludes( tracks=True, releaseGroup=True )
 
   while attempt < 5:

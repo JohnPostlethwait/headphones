@@ -17,8 +17,8 @@ from headphones import helpers
 
 from lib.musicbrainz2 import utils
 
-# Todo: MAKE ALL OF THIS RUN WITHOUT EXCEPTION UPON INTERNET DISCONNECTION!
 
+# Todo: MAKE ALL OF THIS RUN WITHOUT EXCEPTION UPON INTERNET DISCONNECTION!
 def scan():
   logger.info(u"Now scanning the music library located at %s." % unicode(headphones.MUSIC_DIR, errors="ignore"))
 
@@ -86,26 +86,31 @@ def scan():
 def addArtist( id3_artist_name, path ):
   connection          = db.DBConnection()
   musicbrainz_artist  = musicbrainz.getBestArtistMatch( id3_artist_name )
-  print str(id3_artist_name)
-  print str(musicbrainz_artist)
-  connection.action('INSERT INTO artists (artist_name, artist_unique_name, \
-      artist_sort_name, artist_location, artist_state, artist_mb_id) VALUES(?, ?, ?, ?, ?, ?)',
-      [ id3_artist_name, musicbrainz_artist.getUniqueName(),
-      musicbrainz_artist.getSortName(), path, 'wanted', utils.extractUuid(musicbrainz_artist.id)])
 
-  artist_record = connection.action('SELECT * FROM artists WHERE artist_mb_id = ?', [utils.extractUuid(musicbrainz_artist.id)]).fetchone()
+  if musicbrainz_artist is None:
+    unique_name = id3_artist_name
+    sort_name = id3_artist_name
+    artist_mb_id = None
+  else:
+    unique_name = musicbrainz_artist.getUniqueName()
+    sort_name = musicbrainz_artist.getSortName()
+    artist_mb_id = utils.extractUuid(musicbrainz_artist.id)
+
+  artist_record = connection.action('INSERT INTO artists (artist_name, artist_unique_name, \
+      artist_sort_name, artist_location, artist_state, artist_mb_id) VALUES(?, ?, ?, ?, ?, ?)',
+      [ id3_artist_name, unique_name, sort_name, path, 'wanted', artist_mb_id]).fetchone()
+
+  print(artist_record)
 
   return artist_record
 
 
 def addReleases( artist_id, update_artist = True ):
-  print "ARTIST ID IS: '" + str(artist_id) + "'"
-
   connection          = db.DBConnection()
   artist_record       = connection.action('SELECT artist_name FROM artists WHERE artist_id = ?', (artist_id,)).fetchone()
   musicbrainz_artist  = musicbrainz.getBestArtistMatch( artist_record['artist_name'] )
   release_ids         = []
-  print str(musicbrainz_artist)
+
   for release in musicbrainz_artist.getReleases():
     release_ids.append( utils.extractUuid(release.id) )
 

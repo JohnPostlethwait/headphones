@@ -478,7 +478,7 @@ def dbcheck():
     c = conn.cursor()
 
     # Artists Table
-    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_unique_name TEXT NOT NULL, artist_sort_name TEXT, artist_mb_id TEXT UNIQUE NOT NULL, artist_location TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_unique_name TEXT NOT NULL, artist_sort_name TEXT, artist_mb_id TEXT UNIQUE, artist_location TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
     # Albums (Releases) Table
     c.execute('CREATE TABLE IF NOT EXISTS albums (album_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_mb_id TEXT UNIQUE NOT NULL, album_release_group_id TEXT, album_asin TEXT, artist_id INTEGER NOT NULL, album_name TEXT, album_location TEXT, album_type TEXT, album_released_on TEXT, album_added_on TEXT DEFAULT CURRENT_TIMESTAMP, album_state TEXT, FOREIGN KEY(artist_id) REFERENCES artists(artist_id))')
     # Tracks Table
@@ -490,7 +490,7 @@ def dbcheck():
     # Index Creation
     c.execute('CREATE INDEX IF NOT EXISTS albums_artist_ids ON albums(artist_id ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS tracks_album_ids ON tracks(album_id ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS snatched_track_ids ON snatched(track_id ASC)')
+    # c.execute('CREATE INDEX IF NOT EXISTS snatched_track_ids ON snatched(track_id ASC)')
 
     conn.commit()
     c.close()
