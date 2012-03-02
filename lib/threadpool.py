@@ -11,6 +11,7 @@ QUEUE_LOCK = threading.Lock()
 
 
 def put(pointer, kwargs = {}):
+  print('Adding a job to the work queue, the kwargs are: %s', kwargs)
   WORK_QUEUE.put( { 'pointer': pointer, 'kwargs': kwargs } )
 
 
@@ -25,11 +26,12 @@ class WorkerQueue(threading.Thread):
     while True:
       with QUEUE_LOCK:
         work_item = self.__queue.get()
+        print('Thread-%s: WORK QUEUE JUST POPPED IS: %s' % (threading.currentThread().ident, work_item['kwargs']))
 
       if work_item is None:
         print('Thread-%s: SLEEPING FOR A SECOND' % threading.currentThread().ident)
 
-        time.sleep( 1000 ) # Sleep for a second if there is nothing in the queue.
+        time.sleep(1000) # Sleep for a second if there is nothing in the queue.
       else:
         print('Thread-%s: Working...' % threading.currentThread().ident)
         print('Thread-%s: Kwargs: %s' % (threading.currentThread().ident, work_item['kwargs']))

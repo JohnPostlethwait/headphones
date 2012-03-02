@@ -23,6 +23,7 @@ def scan():
   logger.info(u"Now scanning the music library located at %s." % unicode(headphones.MUSIC_DIR, errors="ignore"))
 
   connection = db.DBConnection()
+  artists_being_added = []
 
   for dirpath, dirnames, filenames in os.walk( headphones.MUSIC_DIR ):
     logger.debug(u'Now scanning the directory "%s"' % unicode(dirpath, errors="ignore"))
@@ -37,7 +38,7 @@ def scan():
 
         # Try to read the tags from the file, move on if we can't.
         try:
-          media_file = MediaFile( full_path )
+          media_file = MediaFile(full_path)
         except Exception, e:
           logger.debug(u'Cannot read tags of file "%s" because of the exception "%s"' % (unicode(filename, errors="ignore"), str(e)))
           break
@@ -68,17 +69,22 @@ def scan():
         # we do not need to re-add them to the Music Library.
         tracked_artist = connection.action('SELECT artist_id FROM artists WHERE artist_name = "' + id3_artist + '"').fetchone()
 
-        if tracked_artist:
-          logger.debug(u'Artist name "%s" is already tracked by Headphones, moving on...' % id3_artist)
+        if tracked_artist and tracked_artist['artist_id'] not in artists_being_added:
+          print(u'Artist name "%s" is already tracked by Headphones, moving on but adding releases...' % id3_artist)
 
           ThreadPool.put( addReleases, { 'artist_id': tracked_artist['artist_id'] } )
+
+          artists_being_added.append(tracked_artist['artist_id'])
 
           break
         else:
           artist_record = addArtist( id3_artist, artist_path )
           artist_id     = artist_record['artist_id']
 
-          ThreadPool.put( addReleases, { 'artist_id': artist_id } )
+          if artist_id not in artists_being_added:
+            print('We have a new artist! Adding them now: artist_id %s' % artist_id)
+            ThreadPool.put( addReleases, { 'artist_id': artist_id } )
+            artists_being_added.append(artist_id)
 
           break
 
