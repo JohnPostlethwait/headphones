@@ -70,21 +70,23 @@ def scan():
         tracked_artist = connection.action('SELECT artist_id FROM artists WHERE artist_name = "' + id3_artist + '"').fetchone()
 
         if tracked_artist and tracked_artist['artist_id'] not in artists_being_added:
-          print(u'Artist name "%s" is already tracked by Headphones, moving on but adding releases...' % id3_artist)
+          logger.debug(u'Artist name "%s" is already tracked by Headphones, moving on but adding releases...' % id3_artist)
 
           ThreadPool.put( addReleases, { 'artist_id': tracked_artist['artist_id'] } )
-
           artists_being_added.append(tracked_artist['artist_id'])
 
           break
         else:
           artist_record = addArtist( id3_artist, artist_path )
-          artist_id     = artist_record['artist_id']
 
-          if artist_id not in artists_being_added:
-            print('We have a new artist! Adding them now: artist_id %s' % artist_id)
-            ThreadPool.put( addReleases, { 'artist_id': artist_id } )
-            artists_being_added.append(artist_id)
+          if artist_record is not None:
+            artist_id     = artist_record['artist_id']
+
+            if artist_id not in artists_being_added:
+              logger.debug('We have a new artist! Adding them now: artist_id %s' % artist_id)
+
+              ThreadPool.put( addReleases, { 'artist_id': artist_id } )
+              artists_being_added.append(artist_id)
 
           break
 
@@ -102,13 +104,16 @@ def addArtist( id3_artist_name, path ):
     sort_name = musicbrainz_artist.getSortName()
     artist_mb_id = utils.extractUuid(musicbrainz_artist.id)
 
-  artist_record = connection.action('INSERT INTO artists (artist_name, artist_unique_name, \
-      artist_sort_name, artist_location, artist_state, artist_mb_id) VALUES(?, ?, ?, ?, ?, ?)',
-      [ id3_artist_name, unique_name, sort_name, path, 'wanted', artist_mb_id]).fetchone()
+  existing_artist = connection.action('SELECT * FROM artists WHERE artist_mb_id = ? LIMIT 1', [artist_mb_id]).fetchone()
 
-  print(artist_record)
+  if existing_artist:
+    return existing_artist
+  else:
+    artist_record = connection.action('INSERT INTO artists (artist_name, artist_unique_name, \
+        artist_sort_name, artist_location, artist_state, artist_mb_id) VALUES(?, ?, ?, ?, ?, ?)',
+        [ id3_artist_name, unique_name, sort_name, path, 'wanted', artist_mb_id]).fetchone()
 
-  return artist_record
+    return artist_record
 
 
 def addReleases( artist_id, update_artist = True ):

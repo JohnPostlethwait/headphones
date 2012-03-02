@@ -23,7 +23,7 @@ SIGNAL = None
 
 SYS_ENCODING = None
 
-VERBOSE = 1
+VERBOSE = 2
 DAEMON = False
 PIDFILE= None
 
