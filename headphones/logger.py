@@ -1,9 +1,11 @@
 import os
 import threading
 import logging
+
 from logging import handlers
 
 import headphones
+
 from headphones import helpers
 
 MAX_SIZE = 1000000 # 1mb
@@ -17,7 +19,6 @@ class RotatingLogger(object):
     self.max_size = max_size
     self.max_files = max_files
 
-
   def initLogger(self, verbose=1):
     l = logging.getLogger('headphones')
     l.setLevel(logging.DEBUG)
@@ -26,20 +27,20 @@ class RotatingLogger(object):
 
     filehandler = handlers.RotatingFileHandler(self.filename, maxBytes=self.max_size, backupCount=self.max_files)
     filehandler.setLevel(logging.DEBUG)
-
-    fileformatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-
+    fileformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%m-%Y %H:%M:%S')
     filehandler.setFormatter(fileformatter)
     l.addHandler(filehandler)
 
     if verbose:
       consolehandler = logging.StreamHandler()
+      consoleformatter = logging.Formatter('%(asctime)s :: %(message)s', '%d-%m-%Y %H:%M:%S')
+      consolehandler.setFormatter(consoleformatter)
+
       if verbose == 1:
         consolehandler.setLevel(logging.INFO)
       if verbose == 2:
         consolehandler.setLevel(logging.DEBUG)
-      consoleformatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s', '%d-%b-%Y %H:%M:%S')
-      consolehandler.setFormatter(consoleformatter)
+
       l.addHandler(consolehandler)
 
 

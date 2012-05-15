@@ -6,7 +6,7 @@ import time
 import random
 from headphones import logger
 
-NUMBER_OF_WORKERS = 5
+NUMBER_OF_WORKERS = 10
 WORK_QUEUE = Queue.Queue()
 QUEUE_LOCK = threading.Lock()
 

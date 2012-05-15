@@ -1,12 +1,16 @@
 #!/usr/bin/env python
-import os, sys, locale
+import locale
+import os
+import sys
 import time
 
 from lib.configobj import ConfigObj
 
 import headphones
 
-from headphones import webstart, logger
+from headphones import logger
+from headphones import models
+from headphones import webstart
 
 try:
     import argparse
@@ -22,8 +26,6 @@ def main():
 
     headphones.PROG_DIR = os.path.dirname(headphones.FULL_PATH)
     headphones.ARGS = sys.argv[1:]
-
-    # From sickbeard
     headphones.SYS_ENCODING = None
 
     try:
@@ -84,6 +86,16 @@ def main():
 
     # Put the database in the DATA_DIR
     headphones.DB_FILE = os.path.join(headphones.DATA_DIR, 'headphones.db')
+    os.environ['PEEWEE_DATABASE'] = headphones.DB_FILE
+    # Create the database tables if they do not already exist.
+    for model in (models.Album, models.Artist, models.Track,):
+      logger.info('Checking if the database table %ss exists...' % model.__name__)
+
+      if not model.table_exists():
+        logger.info("The %ss table does not exist, creating it..." % model.__name__)
+
+        model.create_table()
+
     headphones.CFG = ConfigObj(headphones.CONFIG_FILE, encoding='utf-8')
 
     # Read config & start logging
@@ -95,18 +107,17 @@ def main():
     # Force the http port if neccessary
     if args.port:
         http_port = args.port
-        logger.info('Starting Headphones on foced port: %i' % http_port)
+        logger.info('Starting Headphones on forced port: %i' % http_port)
     else:
         http_port = int(headphones.HTTP_PORT)
 
     # Try to start the server.
     webstart.initialize({
-                    'http_port':        http_port,
-                    'http_host':        headphones.HTTP_HOST,
-                    'http_root':        headphones.HTTP_ROOT,
-                    'http_username':    headphones.HTTP_USERNAME,
-                    'http_password':    headphones.HTTP_PASSWORD,
-            })
+        'http_port':        http_port,
+        'http_host':        headphones.HTTP_HOST,
+        'http_root':        headphones.HTTP_ROOT,
+        'http_username':    headphones.HTTP_USERNAME,
+        'http_password':    headphones.HTTP_PASSWORD,})
 
     logger.info('Starting Headphones on port: %i' % http_port)
 

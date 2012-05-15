@@ -7,7 +7,7 @@ from lib.beets import autotag
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, albumart, lyrics, logger, helpers
+from headphones import models, albumart, lyrics, logger, helpers
 
 def checkFolder():
   myDB = db.DBConnection()

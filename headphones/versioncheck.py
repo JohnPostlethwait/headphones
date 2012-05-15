@@ -1,9 +1,12 @@
-import platform, subprocess, re, os
-
-import urllib2
+import os
+import platform
+import re
+import subprocess
 import tarfile
+import urllib2
 
 import headphones
+
 from headphones import logger, version
 
 from lib.pygithub import github
@@ -24,10 +27,10 @@ def runGit(args):
     cmd = cur_git+' '+args
 
     try:
-      logger.debug('Trying to execute: "' + cmd + '" with shell in ' + headphones.PROG_DIR)
+      logger.debug('GIT: Checking revision with: "' + cmd + '" in ' + headphones.PROG_DIR)
       p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=headphones.PROG_DIR)
       output, err = p.communicate()
-      logger.debug('Git output: ' + output)
+      logger.debug('GIT: Revision reported as: ' + output)
     except OSError:
       logger.debug('Command ' + cmd + ' didn\'t work, couldn\'t find git')
       continue

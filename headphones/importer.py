@@ -9,14 +9,13 @@ import headphones
 
 from headphones import logger
 from headphones import helpers
-from headphones import db
+from headphones import models
 from headphones import mb
 from headphones import albumart
 from headphones import lastfm
 
+
 various_artists_mbid = '89ad4ac3-39f7-470e-963a-56509c546377'
-
-
 
 
 # See if the artist is already in the database.

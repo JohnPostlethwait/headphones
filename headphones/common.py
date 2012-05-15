@@ -1,9 +1,7 @@
-'''
-Created on Aug 1, 2011
-
-@author: Michael
-'''
-import platform, operator, os, re
+import platform
+import operator
+import os
+import re
 
 from headphones import version
 
@@ -30,7 +28,6 @@ IGNORED = 7 # releases that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
 
 class Quality:
-
     NONE = 0
     B192 = 1<<1     # 2
     VBR =  1<<2     # 4

@@ -1,4 +1,4 @@
-from headphones import db
+from headphones import models
 
 def getAlbumArt(albumid):
   myDB = db.DBConnection()

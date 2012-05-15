@@ -4,7 +4,7 @@ import glob
 from lib.beets.mediafile import MediaFile
 
 import headphones
-from headphones import db, logger, helpers, importer
+from headphones import models, logger, helpers, importer
 
 
 

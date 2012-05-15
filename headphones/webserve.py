@@ -12,7 +12,7 @@ import headphones
 
 from headphones import logger
 from headphones import searcher
-from headphones import db
+from headphones import models
 from headphones import librarysync
 from headphones import importer
 from headphones import mb

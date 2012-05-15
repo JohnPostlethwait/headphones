@@ -11,7 +11,15 @@ from lib.configobj import ConfigObj
 
 import cherrypy
 
-from headphones import updater, searcher, importer, versioncheck, logger, postprocessor, version, sab, librarysync
+from headphones import updater
+from headphones import searcher
+from headphones import importer
+from headphones import versioncheck
+from headphones import logger
+from headphones import postprocessor
+from headphones import version
+from headphones import sab
+from headphones import librarysync
 from headphones.common import *
 
 
@@ -123,6 +131,7 @@ ENCODERQUALITY = None
 ENCODERVBRCBR = None
 ENCODERLOSSLESS = False
 
+
 def CheckSection(sec):
     """ Check if INI section exists, if not create it """
     try:
@@ -132,9 +141,7 @@ def CheckSection(sec):
         CFG[sec] = {}
         return False
 
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
+
 def check_setting_int(config, cfg_name, item_name, def_val):
     try:
         my_val = int(config[cfg_name][item_name])
@@ -148,9 +155,7 @@ def check_setting_int(config, cfg_name, item_name, def_val):
     logger.debug(item_name + " -> " + str(my_val))
     return my_val
 
-################################################################################
-# Check_setting_str                                                            #
-################################################################################
+
 def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     try:
         my_val = config[cfg_name][item_name]
@@ -167,7 +172,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     else:
         logger.debug(item_name + " -> ******")
     return my_val
-    
+
 
 def initialize():
     with INIT_LOCK:
@@ -198,10 +203,10 @@ def initialize():
             HTTP_PORT = check_setting_int(CFG, 'General', 'http_port', 8181)
         except:
             HTTP_PORT = 8181
-            
+
         if HTTP_PORT < 21 or HTTP_PORT > 65535:
             HTTP_PORT = 8181
-            
+
         HTTP_HOST = check_setting_str(CFG, 'General', 'http_host', '0.0.0.0')
         HTTP_USERNAME = check_setting_str(CFG, 'General', 'http_username', '')
         HTTP_PASSWORD = check_setting_str(CFG, 'General', 'http_password', '')
@@ -209,7 +214,7 @@ def initialize():
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
-        
+
         MUSIC_DIR = check_setting_str(CFG, 'General', 'music_dir', '')
         DESTINATION_DIR = check_setting_str(CFG, 'General', 'destination_dir', '')
         PREFERRED_QUALITY = check_setting_int(CFG, 'General', 'preferred_quality', 0)
@@ -229,25 +234,25 @@ def initialize():
         BLACKHOLE_DIR = check_setting_str(CFG, 'General', 'blackhole_dir', '')
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', '')
         INCLUDE_EXTRAS = bool(check_setting_int(CFG, 'General', 'include_extras', 0))
-        
+
         NZB_SEARCH_INTERVAL = check_setting_int(CFG, 'General', 'nzb_search_interval', 360)
         LIBRARYSCAN_INTERVAL = check_setting_int(CFG, 'General', 'libraryscan_interval', 300)
         DOWNLOAD_SCAN_INTERVAL = check_setting_int(CFG, 'General', 'download_scan_interval', 5)
-        
+
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
-        
+
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
-        
+
         NEWZNAB = bool(check_setting_int(CFG, 'Newznab', 'newznab', 0))
         NEWZNAB_HOST = check_setting_str(CFG, 'Newznab', 'newznab_host', '')
         NEWZNAB_APIKEY = check_setting_str(CFG, 'Newznab', 'newznab_apikey', '')
-        
+
         NZBSORG = bool(check_setting_int(CFG, 'NZBsorg', 'nzbsorg', 0))
         NZBSORG_UID = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_uid', '')
         NZBSORG_HASH = check_setting_str(CFG, 'NZBsorg', 'nzbsorg_hash', '')
@@ -284,11 +289,8 @@ def initialize():
         # Start the logger, silence console logging if we need to
         logger.headphones_log.initLogger(verbose=VERBOSE)
 
-        # Update some old config code:
-        if FOLDER_FORMAT == '%artist/%album/%track':
-            FOLDER_FORMAT = 'artist/album [year]'
-        if FILE_FORMAT == '%tracknumber %artist - %album - %title':
-            FILE_FORMAT = 'tracknumber artist - album - title'
+        FOLDER_FORMAT = 'artist/album [year]'
+        FILE_FORMAT = 'tracknumber artist - album - title'
 
         # Put the cache dir in the data dir for now
         CACHE_DIR = os.path.join(DATA_DIR, 'cache')
@@ -297,13 +299,6 @@ def initialize():
                 os.makedirs(CACHE_DIR)
             except OSError:
                 logger.error('Could not create cache dir. Check permissions of datadir: ' + DATA_DIR)
-
-        # Initialize the database
-        logger.info('Checking to see if the database has all tables....')
-        try:
-            dbcheck()
-        except Exception, e:
-            logger.error("Can't connect to the database: %s" % e)
 
         # Get the currently installed version - returns None, 'win32' or the git hash
         # Also sets INSTALL_TYPE variable to 'win', 'git' or 'source'
@@ -317,6 +312,7 @@ def initialize():
 
         __INITIALIZED__ = True
         return True
+
 
 def daemonize():
     if threading.activeCount() != 1:
@@ -366,6 +362,7 @@ def daemonize():
         logger.info('Writing PID %s to %s' % (pid, PIDFILE))
         file(PIDFILE, 'w').write("%s\n" % pid)
 
+
 def launch_browser(host, port, root):
     if host == '0.0.0.0':
         host = 'localhost'
@@ -374,6 +371,7 @@ def launch_browser(host, port, root):
         webbrowser.open('http://%s:%i%s' % (host, port, root))
     except Exception, e:
         logger.error('Could not launch browser: %s' % e)
+
 
 def config_write():
     new_config = ConfigObj()
@@ -472,28 +470,6 @@ def start():
       SCHED.start()
 
       started = True
-
-def dbcheck():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-
-    # Artists Table
-    c.execute('CREATE TABLE IF NOT EXISTS artists (artist_id INTEGER UNIQUE PRIMARY KEY NOT NULL, artist_name TEXT NOT NULL, artist_unique_name TEXT NOT NULL, artist_sort_name TEXT, artist_mb_id TEXT UNIQUE, artist_location TEXT, artist_added_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_updated_on TEXT DEFAULT CURRENT_TIMESTAMP, artist_state TEXT)')
-    # Albums (Releases) Table
-    c.execute('CREATE TABLE IF NOT EXISTS albums (album_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_mb_id TEXT UNIQUE NOT NULL, album_release_group_id TEXT, album_asin TEXT, artist_id INTEGER NOT NULL, album_name TEXT, album_location TEXT, album_type TEXT, album_released_on TEXT, album_added_on TEXT DEFAULT CURRENT_TIMESTAMP, album_state TEXT, FOREIGN KEY(artist_id) REFERENCES artists(artist_id))')
-    # Tracks Table
-    c.execute('CREATE TABLE IF NOT EXISTS tracks (track_id INTEGER UNIQUE PRIMARY KEY NOT NULL, album_id INTEGER, track_number INTEGER, track_title TEXT, track_length TEXT, track_location TEXT UNIQUE, track_added_on TEXT DEFAULT CURRENT_TIMESTAMP, track_state TEXT, FOREIGN KEY(album_id) REFERENCES albums(album_id))')
-    # Snatched Tracking Table
-    c.execute('CREATE TABLE IF NOT EXISTS snatched (album_id INTEGER UNIQUE NOT NULL, FOREIGN KEY(album_id) REFERENCES albums(album_id))')
-    # Last.FM Suggestion Cloud
-    c.execute('CREATE TABLE IF NOT EXISTS lastfmcloud (ArtistName TEXT, ArtistID TEXT, Count INTEGER)')
-    # Index Creation
-    c.execute('CREATE INDEX IF NOT EXISTS albums_artist_ids ON albums(artist_id ASC)')
-    c.execute('CREATE INDEX IF NOT EXISTS tracks_album_ids ON tracks(album_id ASC)')
-    # c.execute('CREATE INDEX IF NOT EXISTS snatched_track_ids ON snatched(track_id ASC)')
-
-    conn.commit()
-    c.close()
 
 
 def shutdown(restart=False, update=False):
